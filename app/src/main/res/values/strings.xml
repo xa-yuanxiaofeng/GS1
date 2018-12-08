@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">GS</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string-array name="plateNumber">
+        <item>陕AS560S</item>
+        <item>陕AS561S</item>
+        <item>陕AS562S</item>
+        <item>陕AS563S</item>
+        <item>陕AS564S</item>
+        <item>陕AS565S</item>
+        <item>陕AS566S</item>
+        <item>陕AS567S</item>
+        <item>陕AS568S</item>
+        <item>陕AS569S</item>
+    </string-array>
+</resources>
