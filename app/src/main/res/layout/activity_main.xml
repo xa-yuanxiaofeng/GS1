@@ -24,7 +24,7 @@
                 android:text="入场车辆"
                 android:textAlignment="center"
                 android:textSize="40sp"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="30dp"/>
 
             <ListView
                 android:id="@+id/plateNumberList"

@@ -1,18 +1,20 @@
 package com.browse.gs;
 
-import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    SettingDialog sd;
     private TabLayout tabLayout;
 
     private ViewPager viewPager;
@@ -33,7 +35,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         init();
+        initEvent();
     }
+
     private void init() {
         Resources res =getResources();
         tabHeader=res.getStringArray(R.array.plateNumber);
@@ -66,5 +70,20 @@ public class MainActivity extends AppCompatActivity {
         }
         fpAdapter.notifyDataSetChanged();
     }
+    private void initEvent() {
+        findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSetting();
+            }
+        });
+    }
+
+    private void showSetting(){
+        sd= new SettingDialog(this);
+        sd.show();
+    }
 
 }
+
+
