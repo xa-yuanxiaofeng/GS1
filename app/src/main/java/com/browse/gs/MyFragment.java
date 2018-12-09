@@ -15,7 +15,7 @@ import android.widget.TextView;
 public  class MyFragment extends Fragment {
     private Context context;
     private String content;
-
+    private View rootView;
     public MyFragment() {
     }
 
@@ -28,11 +28,8 @@ public  class MyFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        TextView textView = new TextView(context);
-        textView.setText(content);
-        textView.setTextSize(120);
-        textView.setGravity(Gravity.CENTER);
-        return textView;
+        rootView = inflater.inflate(R.layout.activity_content, null);
+        return rootView;
 
     }
 

@@ -23,16 +23,15 @@
                 android:layout_height="wrap_content"
                 android:text="入场车辆"
                 android:textAlignment="center"
-                android:textSize="24sp" />
+                android:textSize="40sp" />
 
             <ListView
                 android:layout_width="134dp"
                 android:layout_height="0dp"
                 android:layout_weight="10"
                 android:entries="@array/plateNumber"
-                android:paddingLeft="8dp">
+                android:paddingLeft="20dp" />
 
-            </ListView>
 
             <LinearLayout
                 android:layout_width="match_parent"

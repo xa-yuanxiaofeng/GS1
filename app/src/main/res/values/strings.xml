@@ -2,15 +2,21 @@
     <string name="app_name">GS</string>
     <string name="title_item_detail">Item Detail</string>
     <string-array name="plateNumber">
-        <item>陕AS560S</item>
-        <item>陕AS561S</item>
-        <item>陕AS562S</item>
-        <item>陕AS563S</item>
-        <item>陕AS564S</item>
-        <item>陕AS565S</item>
-        <item>陕AS566S</item>
-        <item>陕AS567S</item>
-        <item>陕AS568S</item>
-        <item>陕AS569S</item>
+        <item>陕123121</item>
+        <item>京77889S</item>
+        <item>沪000000</item>
+        <item>吉090899</item>
+        <item>浙242342</item>
+        <item>川342346</item>
+        <item>湘9837u4</item>
+        <item>赣983475</item>
+        <item>黑576573</item>
+        <item>宁83432w</item>
+    </string-array>
+    <string-array name="operator">
+        <item>张三</item>
+        <item>李四</item>
+        <item>王五</item>
+        <item>张三丰</item>
     </string-array>
 </resources>
