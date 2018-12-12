@@ -1,33 +1,30 @@
 package com.browse.gs;
 
-import android.content.Intent;
-import android.content.res.Resources;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.browse.gs.adpter.ContentViewPageAdapter;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     SettingDialog sd;
-    private TabLayout tabLayout;
 
+    private TabLayout tabLayout;
     private ViewPager viewPager;
 
-    private MyFPAdapter fpAdapter;
+    private ContentViewPageAdapter viewPagerAdapter;
 
     private ListView plateNumberListView;
     private ArrayAdapter<String> plateNumberAdapter;
 
-    private ArrayList<Fragment> fragments = new ArrayList<>();
-    private String[] fragment = new String[]{"最新","热门","我的","最新","热门","我的","最新","热门","我的","ok"};
-    private String[] tabHeader ;
-
+    private ArrayList<String> plateNumbers= new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,40 +33,47 @@ public class MainActivity extends AppCompatActivity {
 
         init();
         initEvent();
+
     }
 
     private void init() {
-        Resources res =getResources();
-        tabHeader=res.getStringArray(R.array.plateNumber);
+        String[] data=new String[]{"陕123121","京77889S","沪000000","吉090899","浙242342",
+                "川342346","湘9837u4","赣983475","黑576573","宁834323"};
+        for( String item:data)
+            plateNumbers.add(item);
 
-        tabLayout = findViewById(R.id.tabLayout);
-        viewPager =  findViewById(R.id.viewPager);
+
         plateNumberListView=findViewById(R.id.plateNumberList);
-
         plateNumberAdapter = new ArrayAdapter<String>(
                 MainActivity.this,
                 R.layout.plate_number_item,
                 R.id.plate_item,
-                new String[]{"陕123121","京77889S","沪000000","吉090899","浙242342",
-                          "川342346","湘9837u4","赣983475","黑576573","宁834323"}
+                plateNumbers
         );
 
+        tabLayout =  findViewById(R.id.tab_layout);
+
+        viewPager =  findViewById(R.id.viewPager);
+        viewPagerAdapter = new ContentViewPageAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(viewPagerAdapter);
+
+        tabLayout.setupWithViewPager(viewPager);
+
         plateNumberListView.setAdapter(plateNumberAdapter);
+        plateNumberListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            //list点击事件
+            @Override
+            public void onItemClick(AdapterView<?> p1, View p2, int p3, long p4)
+            {
+                String tabHeader=plateNumbers.get(p3);
+               // plateNumbers.remove(p3);
+                plateNumberAdapter.notifyDataSetChanged();
+                viewPagerAdapter.notifyDataSetChanged();
+            }
+        });
 
-
-
-        tabLayout.setupWithViewPager(viewPager,false);
-
-        fpAdapter = new MyFPAdapter(fragments,tabLayout,getSupportFragmentManager());
-
-        viewPager.setAdapter(fpAdapter);
-
-        for(int i=0;i<tabHeader.length;i++){
-            fragments.add(new MyFragment(this.getApplicationContext(), fragment[i]));
-            tabLayout.addTab(tabLayout.newTab().setText(tabHeader[i]));
-        }
-        fpAdapter.notifyDataSetChanged();
     }
+
     private void initEvent() {
         findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
             @Override

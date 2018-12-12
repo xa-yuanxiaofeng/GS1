@@ -12,17 +12,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public  class MyFragment extends Fragment {
-    private Context context;
-    private String content;
+public  class ContentFragment extends Fragment {
+    private static final String ARG_SECTION = "section";
     private View rootView;
-    public MyFragment() {
+    public ContentFragment() {
     }
 
-    @SuppressLint("ValidFragment")
-    public MyFragment(Context contexts, String content) {
-        this.context = contexts;
-        this.content = content;
+    public static ContentFragment newInstance(String section) {
+        ContentFragment fragment = new ContentFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_SECTION, section);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Nullable
@@ -32,9 +33,5 @@ public  class MyFragment extends Fragment {
             rootView = inflater.inflate(R.layout.activity_content, null);
         }
         return rootView;
-    }
-
-    public String getContent() {
-        return content;
     }
 }
