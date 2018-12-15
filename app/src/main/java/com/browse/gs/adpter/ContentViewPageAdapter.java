@@ -10,12 +10,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.browse.gs.ContentFragment;
+import com.browse.gs.MainActivity;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class ContentViewPageAdapter extends FragmentPagerAdapter {
-    ArrayList<String> tabs =new ArrayList<>(Arrays.asList("首页","资讯","直播","我"));
+    ArrayList<String> tabs =new ArrayList<String>();
+    ArrayList<ContentFragment> contents =new ArrayList<ContentFragment>();
 
     public ContentViewPageAdapter(FragmentManager fm) {
         super(fm);
@@ -28,12 +29,26 @@ public class ContentViewPageAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int i) {
-        return ContentFragment.newInstance(tabs.get(i));
+        ContentFragment ret=null;
+        ret = ContentFragment.newInstance(tabs.get(i));
+        contents.add(ret);
+        return ret;
     }
 
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
         return tabs.get(position);
+    }
+    public void addTab(String tabName){
+        this.tabs.add(tabName);
+
+    }
+    public void removeTab(int position){
+        this.tabs.remove(position);
+        this.contents.remove(position);
+        this.notifyDataSetChanged();
+        MainActivity.getMainActivity().tabLayout.invalidate();
+
     }
 }

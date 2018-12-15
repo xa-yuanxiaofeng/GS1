@@ -20,4 +20,9 @@
     <style name="tabHeader">
         <item name="android:textSize">@dimen/tab_size</item>
     </style>
-</resources>
+
+    <style name="MyTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">40sp</item>
+    </style>
+   </resources>

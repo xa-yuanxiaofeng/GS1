@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 
 import com.browse.gs.adpter.ContentViewPageAdapter;
@@ -15,11 +16,13 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     SettingDialog sd;
-
-    private TabLayout tabLayout;
+    static MainActivity ma;
+    public TabLayout tabLayout;
     private ViewPager viewPager;
 
-    private ContentViewPageAdapter viewPagerAdapter;
+    private Button exitButton;
+
+    public ContentViewPageAdapter viewPagerAdapter;
 
     private ListView plateNumberListView;
     private ArrayAdapter<String> plateNumberAdapter;
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ma=this;
         setContentView(R.layout.activity_main);
 
         init();
@@ -66,11 +70,20 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> p1, View p2, int p3, long p4)
             {
                 String tabHeader=plateNumbers.get(p3);
-               // plateNumbers.remove(p3);
+                viewPagerAdapter.addTab(tabHeader);
+                plateNumbers.remove(p3);
                 plateNumberAdapter.notifyDataSetChanged();
                 viewPagerAdapter.notifyDataSetChanged();
             }
         });
+        exitButton= findViewById(R.id.exit1);
+        exitButton.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                System.exit(0);//正常退出App
+            }
+        });
+
 
     }
 
@@ -87,6 +100,10 @@ public class MainActivity extends AppCompatActivity {
         sd= new SettingDialog(this);
         sd.show();
     }
+    public static MainActivity getMainActivity() {
+        return ma;
+    }
+
 
 }
 
