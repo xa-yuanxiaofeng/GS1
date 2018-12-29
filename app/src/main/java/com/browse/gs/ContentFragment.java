@@ -34,9 +34,6 @@ public  class ContentFragment extends Fragment {
             buttonFinish.setOnClickListener(new Button.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-                    int i=MainActivity.getMainActivity().tabLayout.getSelectedTabPosition();
-                    if(i>-1)
-                        MainActivity.getMainActivity().viewPagerAdapter.removeTab(i);
                 }
             });
 

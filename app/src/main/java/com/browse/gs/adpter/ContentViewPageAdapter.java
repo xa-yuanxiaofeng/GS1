@@ -48,7 +48,6 @@ public class ContentViewPageAdapter extends FragmentPagerAdapter {
         this.tabs.remove(position);
         this.contents.remove(position);
         this.notifyDataSetChanged();
-        MainActivity.getMainActivity().tabLayout.invalidate();
 
     }
 }

@@ -21,8 +21,13 @@
         <item name="android:textSize">@dimen/tab_size</item>
     </style>
 
-    <style name="MyTabTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="textAllCaps">false</item>
+    <style name="MyTabTextAppearance" >
         <item name="android:textSize">40sp</item>
     </style>
+
+    <style name="AppThemeprice" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+
+
    </resources>
