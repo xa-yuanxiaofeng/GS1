@@ -35,4 +35,8 @@
         <item name="android:textSize">30sp</item>
     </style>
 
+    <style name="spinnerSize" parent="Widget.AppCompat.Spinner">
+        <item name="android:textSize">30sp</item>
+    </style>
+
    </resources>

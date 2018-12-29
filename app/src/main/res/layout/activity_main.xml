@@ -128,7 +128,8 @@
                         android:layout_height="wrap_content"
                         android:ems="10"
                         android:entries="@array/ganNumber"
-                        android:inputType="textPersonName" />
+                        android:inputType="textPersonName"
+                        style="@style/spinnerSize"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -417,7 +418,7 @@
                                 android:id="@+id/textView"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="司机签字:"
+                                android:text="司机签名:"
                                 android:textSize="30sp" />
                         </LinearLayout>
 
@@ -427,7 +428,12 @@
                             android:layout_height="270dp"
                             android:layout_weight="5"
                             android:background="@drawable/sign_border"
-                            android:orientation="horizontal"></LinearLayout>
+                            android:orientation="horizontal">
+                            <com.browse.gs.SignatureView
+                                android:id="@+id/sign"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" />
+                        </LinearLayout>
 
 
                     </LinearLayout>
