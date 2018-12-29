@@ -69,6 +69,7 @@
                 android:layout_weight="1"
                 android:visibility="visible"
                 app:tabMode="scrollable"
+                style="@style/StockTabLayout"
                 />
             <LinearLayout
                 android:id="@+id/main_content"

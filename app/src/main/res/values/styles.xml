@@ -21,13 +21,18 @@
         <item name="android:textSize">@dimen/tab_size</item>
     </style>
 
-    <style name="MyTabTextAppearance" >
-        <item name="android:textSize">40sp</item>
-    </style>
-
     <style name="AppThemeprice" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="StockTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabTextAppearance">@style/StockTextAppearance</item>
+        <item name="tabIndicatorHeight">1dp</item>
+        <item name="tabMode">fixed</item>
+    </style>
+
+    <style name="StockTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">30sp</item>
+    </style>
 
    </resources>

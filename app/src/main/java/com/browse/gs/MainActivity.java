@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,9 +25,10 @@ public class MainActivity extends AppCompatActivity {
     //设置按钮
     Button btSetting;
     Button btExit;
-
+    Button btFinish;
     //上面tab
     TabLayout topTabs;
+    ArrayList<String> topData=new ArrayList<String>();
 
     //气瓶编号
     @BindView(R.id.etCylinderNumber)
@@ -54,11 +56,13 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("WrongViewCast")
     private void init() {
 
-        //左数据初始化
+        //左列表数据初始化
         String[] data=new String[]{"陕123121","京77889S","沪000000","吉090899","浙242342",
                 "川342346","湘9837u4","赣983475","黑576573","宁834323"};
         for( String item:data)
             plateNumbers.add(item);
+
+        //左列表
         leftListViewAdapter = new ArrayAdapter<String>(
                 MainActivity.this,
                 R.layout.plate_number_item,
@@ -67,18 +71,20 @@ public class MainActivity extends AppCompatActivity {
         );
         leftListView = findViewById(R.id.lvLeft);
         leftListView.setAdapter(leftListViewAdapter);
+        //设置listview点击事件
+        leftListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                //topTab加入选中的数据
+                topTabs.addTab(topTabs.newTab().setText( plateNumbers.get(i)));
+                //自身列表中删除
+                plateNumbers.remove(i);
+                leftListViewAdapter.notifyDataSetChanged();
+            }
+        });
 
-        // top数据初始化
+        // topTabs初始化
         topTabs=findViewById(R.id.tlTop);
-        for(int i=0;i<8;i++) {
-            TabLayout.Tab tab=topTabs.newTab();
-            topTabs.addTab(topTabs.newTab().setText(data[i]));
-
-        }
-
-
-
-
     }
 
     private void initEvent() {
@@ -94,6 +100,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 System.exit(0);//正常退出App
+            }
+        });
+        btFinish=findViewById(R.id.buttonFinish);
+        btFinish.setOnClickListener(new Button.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                //删除当前选中的tab
+                topTabs.removeTabAt(topTabs.getTop());
             }
         });
     }
