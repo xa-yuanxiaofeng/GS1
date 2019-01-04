@@ -1,6 +1,7 @@
 package com.browse.gs;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -11,9 +12,17 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.browse.gs.util.Util;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
 public class SignatureView extends View {
     private static final float STROKE_WIDTH = 5f;
 
+    //文件地址
+    public String url;
+    private Boolean scrawled=false;
     /** Need to track this so the dirty region can accommodate the stroke. **/
     private static final float HALF_STROKE_WIDTH = STROKE_WIDTH / 2;
 
@@ -49,11 +58,19 @@ public class SignatureView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+
+        //如果文件已经存在，则进行显示
+        if (url != null) {
+            Bitmap bmp = Util.getBitmapThumbnail(url, this.getWidth(), this.getHeight());
+            canvas.drawBitmap(bmp, 0, 0, paint);
+            bmp.recycle();
+        }
         canvas.drawPath(path, paint);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        scrawled = true;
         float eventX = event.getX();
         float eventY = event.getY();
 
@@ -130,5 +147,36 @@ public class SignatureView extends View {
         dirtyRect.right = Math.max(lastTouchX, eventX);
         dirtyRect.top = Math.min(lastTouchY, eventY);
         dirtyRect.bottom = Math.max(lastTouchY, eventY);
+    }
+
+    // 保存签名
+    public void saveToFile(String id) {
+        if (!scrawled)
+            return;
+
+        FileOutputStream out = null;
+        File target = new File(Util.getSharedPreference(this.getContext(),
+                "FileDir"));
+        target.mkdirs();
+        Bitmap bt = Bitmap.createBitmap(this.getWidth(), this.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas();
+        canvas.setBitmap(bt);
+        //this.onDraw(canvas);
+        this.draw(canvas);
+        try {
+            out = new FileOutputStream(Util.getSharedPreference(
+                    this.getContext(), "FileDir")
+                    + id + ".png");
+            bt.compress(Bitmap.CompressFormat.PNG, 90, out);
+            bt.recycle();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null)
+                    out.close();
+            } catch (Throwable ignore) {
+            }
+        }
     }
 }
