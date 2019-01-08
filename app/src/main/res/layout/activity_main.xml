@@ -96,8 +96,7 @@
                         android:id="@+id/etCylinderNumber"
                         android:layout_width="125dp"
                         android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:inputType="textPersonName" />
+                        android:inputType="number" />
 
                     <TextView
                         android:id="@+id/textView4"
@@ -108,11 +107,11 @@
                         android:layout_marginLeft="50dp"/>
 
                     <EditText
-                        android:id="@+id/etValidityPeriod"
-                        android:layout_width="116dp"
+                        android:id="@+id/validDate"
                         android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:inputType="datetime" />
+                        android:layout_width="125dp"
+                        android:textSize="30sp"
+                        android:inputType="date"/>
 
                     <TextView
                         android:id="@+id/textView5"
@@ -173,14 +172,14 @@
                                 android:orientation="horizontal">
 
                                 <RadioButton
-                                    android:id="@+id/radioButton1"
+                                    android:id="@+id/radioSurfaceBeforeGood"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="完好"
                                     android:textSize="30sp" />
 
                                 <RadioButton
-                                    android:id="@+id/radioButton2"
+                                    android:id="@+id/radioSurfaceBeforeBad"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="损坏"
@@ -201,14 +200,14 @@
                                 android:orientation="horizontal">
 
                                 <RadioButton
-                                    android:id="@+id/radioButton31"
+                                    android:id="@+id/radioLeakBeforeYes"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="是"
                                     android:textSize="24sp" />
 
                                 <RadioButton
-                                    android:id="@+id/radioButton4"
+                                    android:id="@+id/radioLeakBeforeNo"
                                     android:layout_width="80dp"
                                     android:layout_height="wrap_content"
                                     android:text="否"
@@ -244,14 +243,14 @@
                                 android:orientation="horizontal">
 
                                 <RadioButton
-                                    android:id="@+id/radioButton"
+                                    android:id="@+id/radioSufaceAfterGood"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="完好"
                                     android:textSize="30sp" />
 
                                 <RadioButton
-                                    android:id="@+id/radioButton21"
+                                    android:id="@+id/radioSufaceAfterBad"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="损坏"
@@ -272,14 +271,14 @@
                                 android:orientation="horizontal">
 
                                 <RadioButton
-                                    android:id="@+id/radioButton3"
+                                    android:id="@+id/radioLeakAfterYes"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="是"
                                     android:textSize="24sp" />
 
                                 <RadioButton
-                                    android:id="@+id/radioButton41"
+                                    android:id="@+id/radioLeakAfterNo"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="否"
@@ -316,7 +315,7 @@
 
                             <TextView
                                 android:id="@+id/tvStartTime"
-                                android:layout_width="17dp"
+                                android:layout_width="14dp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="50dp"
                                 android:ems="10"
@@ -353,7 +352,7 @@
 
                             <TextView
                                 android:id="@+id/tvEndTime"
-                                android:layout_width="wrap_content"
+                                android:layout_width="12dp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginRight="50dp"
                                 android:ems="10"

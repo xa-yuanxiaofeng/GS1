@@ -5,6 +5,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -12,13 +13,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.browse.gs.util.Util;
 
 import org.json.JSONArray;
@@ -30,6 +36,9 @@ import java.util.Date;
 import java.util.UUID;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -44,21 +53,52 @@ public class MainActivity extends AppCompatActivity {
     //上面tab
     TabLayout topTabs;
     //当前被选中的tab
-    int currentSelectedTab =0;
+    int currentTabIndex =0;
     //页面数据链表
     ArrayList<CheckRecorderEntity> datas=new ArrayList<CheckRecorderEntity>();
 
     //气瓶编号
     @BindView(R.id.etCylinderNumber)
-    EditText cylinderNumber;
+    public EditText cylinderNumber;
     //有效期
-    @BindView(R.id.etValidityPeriod)
-    DatePicker validityPeriod;
+    @BindView(R.id.validDate)
+    public EditText validityDate;
     //加气枪编号
     @BindView(R.id.spGunNumber)
-    Spinner gunNumber;
+    public Spinner gunNumber;
+    //充装前外观
+    @BindView(R.id.rgSurfaceBefore)
+    public RadioGroup rgSurfaceBefore;
+    //充装前泄漏
+    @BindView(R.id.rgLeakBefore)
+    public RadioGroup rgLeakBefore;
+    //充装后外观
+    @BindView(R.id.rgSufaceAfter)
+    public RadioGroup rgSufaceAfter;
+    //充装后泄漏
+    @BindView(R.id.rgLeakAfter)
+    public RadioGroup rgLeakAfter;
+    //充装前余压
+    @BindView(R.id.tvPressBefore)
+    public TextView tvPressBefore;
+    //充装开始时间
+    @BindView(R.id.tvStartTime)
+    public TextView tvStartTime;
+    //充装后压力
+    @BindView(R.id.tvPressAfter)
+    public TextView tvPressAfter;
+    //充装结束时间
+    @BindView(R.id.tvEndTime)
+    public TextView tvEndTime;
+    //检查员
+    @BindView(R.id.spCheckOperator)
+    public Spinner spCheckOperator;
+    //充装员
+    @BindView(R.id.spFillOperator)
+    public Spinner spFillOperator;
     //签字图片
-    ImageView signImage;
+    public ImageView signImage;
+    public String imageFileName;
 
     //配置对话框
     SettingDialog settingDialog;
@@ -68,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         init();
         initEvent();
 
@@ -98,11 +139,11 @@ public class MainActivity extends AppCompatActivity {
                 //topTab加入选中的车牌
                 String selectedPN =plateNumbers.get(i);
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
-                //数据列表中加入检查的实体数据
+                //数据列表中加入检查的实体数据,用车牌号构造
                 datas.add(new CheckRecorderEntity(selectedPN));
                 //设置当前选中的tab
-                currentSelectedTab = topTabs.getTabCount()-1;
-                topTabs.getTabAt(currentSelectedTab).select();
+                currentTabIndex = topTabs.getTabCount()-1;
+                topTabs.getTabAt(currentTabIndex).select();
                 //自身列表中删除
                 plateNumbers.remove(i);
                 leftListViewAdapter.notifyDataSetChanged();
@@ -134,6 +175,11 @@ public class MainActivity extends AppCompatActivity {
         btFinish.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
+                //提交数据
+                commitData(datas.get(currentTabIndex));
+                //删除被提交的数据
+                datas.remove(datas.get(currentTabIndex));
+                datas.get(currentTabIndex);
                 //删除当前选中的tab
                 topTabs.removeTabAt(topTabs.getSelectedTabPosition());
             }
@@ -145,22 +191,45 @@ public class MainActivity extends AppCompatActivity {
         settingDialog= new SettingDialog(this);
         settingDialog.show();
     }
-    //读取显示选中的数据
-    private void  readSelectedData(){
-        datas.get(currentSelectedTab);
+    //读取当前的数据
+    private void  readCurrentData(CheckRecorderEntity entity){
 
     }
-    //保存修改的数据
-    private void saveSelectedData(){
-        datas.get(currentSelectedTab).setCylinderNumber(cylinderNumber.getText().toString());
-        //datas.get(currentSelectedTab).setValidityPeriod(validityPeriod.getAutofillValue());
+    //保存当前的数据
+    private void commitData(CheckRecorderEntity entity){
+        //气瓶号
+        entity.setCylinderNumber(cylinderNumber.getText().toString());
+        //有效期
+        entity.setValidityPeriod(new Date(validityDate.getText().toString()));
+        //枪编号
+        entity.setGunNumber(gunNumber.toString());
+        //充装前外观
+        entity.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
+        //充装前泄漏
+        entity.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId());
+        //充装后外观
+        entity.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId());
+        //充装后泄漏
+        entity.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
+        //图片文件名,从签字返回的result中赋值
+        entity.setSignFile(imageFileName);
+        //检查员
+        entity.setCheckOperator(spCheckOperator.toString());
+        //充装员
+        entity.setFillOperator(spFillOperator.toString());
+        Toast.makeText(this,JSON.toJSONString(entity),LENGTH_LONG).show();
+        //充装前余压
+        //充装开始时间
+        //充装后压力
+        //充装结束时间
+
     }
     //弹出签字界面
     public void popSignPane(View view){
         Intent intent = new Intent();
         intent.setClass(this, SignActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putString("ID","sign"+UUID.randomUUID().toString());
+        bundle.putString("ID","sign-"+UUID.randomUUID().toString());
         intent.putExtras(bundle);
         startActivityForResult(intent,1);
     }
@@ -176,20 +245,23 @@ public class MainActivity extends AppCompatActivity {
         try {
             String result = intent.getStringExtra("result");
             if (intent.hasExtra("signature")) {
-                if (!Util.fileExists(Util.getSharedPreference(
+                imageFileName =Util.getSharedPreference(
                         MainActivity.this, "FileDir")
                         + result
-                        + ".png"))
+                        + ".png";
+                if (!Util.fileExists(imageFileName))
                     return;
                 Util.releaseBitmap(signImage);
-                bmp = Util.getBitmapThumbnail(
-                        Util.getSharedPreference(MainActivity.this,
-                                "FileDir") + result + ".png", 700, 300);
+                bmp = Util.getBitmapThumbnail(imageFileName, 700, 300);
                 signImage.setImageBitmap(bmp);
             }else {
-                if(!Util.fileExists(Util.getSharedPreference(MainActivity.this, "FileDir") + result + ".jpg"))
+                imageFileName =Util.getSharedPreference(
+                        MainActivity.this, "FileDir")
+                        + result
+                        + ".jpg";
+                if(!Util.fileExists(imageFileName))
                     return;
-                bmp = Util.getBitmapThumbnail(Util.getSharedPreference(MainActivity.this, "FileDir") + result + ".jpg", 150,105);
+                bmp = Util.getBitmapThumbnail(imageFileName, 150,105);
                 String idx = result.substring(result.length() - 1);
                 if (idx.equals("1"))
                 {
@@ -197,6 +269,7 @@ public class MainActivity extends AppCompatActivity {
                     signImage.setImageBitmap(bmp);
                 }
             }
+
         } catch (Exception e) {
             Toast.makeText(this, "----------" + e.getMessage(),
                     Toast.LENGTH_SHORT).show();

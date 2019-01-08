@@ -1,38 +1,55 @@
 package com.browse.gs;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
+
+import java.io.Serializable;
 import java.util.Date;
 
 //充装检查数据，实体类
-public class CheckRecorderEntity {
+@JSONType
+public class CheckRecorderEntity implements Serializable {
     //车牌号
-    private String plateNumber;
+    private String plateNumber="";
     //气瓶号
-    private String CylinderNumber;
+    private String CylinderNumber="";
     //有效期
-    private Date ValidityPeriod;
+    private Date ValidityPeriod=new Date();
     //枪编号
-    private String GunNumber;
+    private String GunNumber="";
     //充装前外观检查
-    private boolean surfaceBefore;
+    private int surfaceBefore=0;
     //充装前泄漏检查
-    private boolean leakBefore;
+    private int leakBefore=0;
     //充装后外观检查
-    private boolean surfaceAfter;
+    private int surfaceAfter=0;
     //充装后泄漏检查
-    private boolean leakAfter;
+    private int leakAfter=0;
     //充装前余压
-    private String pressBefore;
+    private String pressBefore="";
     //充装开始时间
-    private Date startTime;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date startTime = new Date();
     //充装后压力
-    private String pressAfter;
+    private String pressAfter="";
     //充装结束时间
-    private Date EndTime;
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date EndTime=new Date();
     //检查员
-    private String CheckOperator;
+    private String CheckOperator="";
     //充装员
-    private String fillOperator;
-    //司机签字
+    private String fillOperator="";
+    //司机签字文件名
+    private String signFile="";
+
+    public String getSignFile() {
+        return signFile;
+    }
+
+    public void setSignFile(String signFile) {
+        this.signFile = signFile;
+    }
+
 
     public String getCylinderNumber() {
         return CylinderNumber;
@@ -64,35 +81,35 @@ public class CheckRecorderEntity {
         this.plateNumber = plateNumber;
     }
 
-    public boolean isSurfaceBefore() {
+    public int isSurfaceBefore() {
         return surfaceBefore;
     }
 
-    public void setSurfaceBefore(boolean surfaceBefore) {
+    public void setSurfaceBefore(int surfaceBefore) {
         this.surfaceBefore = surfaceBefore;
     }
 
-    public boolean isLeakBefore() {
+    public int isLeakBefore() {
         return leakBefore;
     }
 
-    public void setLeakBefore(boolean leakBefore) {
+    public void setLeakBefore(int leakBefore) {
         this.leakBefore = leakBefore;
     }
 
-    public boolean isSurfaceAfter() {
+    public int isSurfaceAfter() {
         return surfaceAfter;
     }
 
-    public void setSurfaceAfter(boolean surfaceAfter) {
+    public void setSurfaceAfter(int surfaceAfter) {
         this.surfaceAfter = surfaceAfter;
     }
 
-    public boolean isLeakAfter() {
+    public int isLeakAfter() {
         return leakAfter;
     }
 
-    public void setLeakAfter(boolean leakAfter) {
+    public void setLeakAfter(int leakAfter) {
         this.leakAfter = leakAfter;
     }
 

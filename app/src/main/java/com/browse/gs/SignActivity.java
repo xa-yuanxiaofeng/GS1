@@ -3,6 +3,7 @@ package com.browse.gs;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -27,7 +28,6 @@ public class SignActivity extends AppCompatActivity {
         signView = (SignatureView) (findViewById(R.id.signView));
         if(Util.fileExists(Util.getSharedPreference(this, "FileDir") + fileName + ".png"))
             signView.url = Util.getSharedPreference(this, "FileDir") + fileName + ".png";
-
         Button btnClear = (Button)this.findViewById(R.id.clear);
         btnClear.setOnClickListener(new View.OnClickListener()
         {
