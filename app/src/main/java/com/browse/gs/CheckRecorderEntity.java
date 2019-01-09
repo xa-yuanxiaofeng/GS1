@@ -4,6 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 //充装检查数据，实体类
@@ -14,7 +15,8 @@ public class CheckRecorderEntity implements Serializable {
     //气瓶号
     private String CylinderNumber="";
     //有效期
-    private Date ValidityPeriod=new Date();
+    @JSONField(format = "yyyyMMdd")
+    private Date ValidityPeriod;
     //枪编号
     private String GunNumber="";
     //充装前外观检查
@@ -27,7 +29,7 @@ public class CheckRecorderEntity implements Serializable {
     private int leakAfter=0;
     //充装前余压
     private String pressBefore="";
-    //充装开始时间
+    //充装开始时间(format = "yyyy-MM-dd HH:mm:ss")
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date startTime = new Date();
     //充装后压力
@@ -81,7 +83,7 @@ public class CheckRecorderEntity implements Serializable {
         this.plateNumber = plateNumber;
     }
 
-    public int isSurfaceBefore() {
+    public int getSurfaceBefore() {
         return surfaceBefore;
     }
 
@@ -89,7 +91,7 @@ public class CheckRecorderEntity implements Serializable {
         this.surfaceBefore = surfaceBefore;
     }
 
-    public int isLeakBefore() {
+    public int getLeakBefore() {
         return leakBefore;
     }
 
@@ -97,7 +99,7 @@ public class CheckRecorderEntity implements Serializable {
         this.leakBefore = leakBefore;
     }
 
-    public int isSurfaceAfter() {
+    public int getSurfaceAfter() {
         return surfaceAfter;
     }
 
@@ -105,7 +107,7 @@ public class CheckRecorderEntity implements Serializable {
         this.surfaceAfter = surfaceAfter;
     }
 
-    public int isLeakAfter() {
+    public int getLeakAfter() {
         return leakAfter;
     }
 

@@ -31,7 +31,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -43,14 +46,19 @@ import static android.widget.Toast.LENGTH_LONG;
 public class MainActivity extends AppCompatActivity {
 
     //左边ListView
+    @BindView(R.id.lvLeft)
     ListView leftListView;
     private ArrayAdapter<String> leftListViewAdapter;
 
     //设置按钮
+    @BindView(R.id.btSetting)
     Button btSetting;
+    @BindView(R.id.btExit)
     Button btExit;
+    @BindView(R.id.buttonFinish)
     Button btFinish;
     //上面tab
+    @BindView(R.id.tlTop)
     TabLayout topTabs;
     //当前被选中的tab
     int currentTabIndex =0;
@@ -62,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     public EditText cylinderNumber;
     //有效期
     @BindView(R.id.validDate)
-    public EditText validityDate;
+    public EditText etValidityDate;
     //加气枪编号
     @BindView(R.id.spGunNumber)
     public Spinner gunNumber;
@@ -97,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.spFillOperator)
     public Spinner spFillOperator;
     //签字图片
+    @BindView(R.id.signImage)
     public ImageView signImage;
     public String imageFileName;
 
@@ -130,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                 R.id.plate_item,
                 plateNumbers
         );
-        leftListView = findViewById(R.id.lvLeft);
         leftListView.setAdapter(leftListViewAdapter);
         //设置listview点击事件
         leftListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -151,37 +159,83 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // topTabs初始化
-        topTabs=findViewById(R.id.tlTop);
-        signImage=findViewById(R.id.signImage);
         this.setPath();
     }
 
     private void initEvent() {
-        btSetting=findViewById(R.id.btSetting);
         btSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showSettingDialog();
             }
         });
-        btExit=findViewById(R.id.btExit);
         btExit.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
                 System.exit(0);//正常退出App
             }
         });
-        btFinish=findViewById(R.id.buttonFinish);
         btFinish.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
                 //提交数据
-                commitData(datas.get(currentTabIndex));
+                try {
+                    commitData(datas.get(currentTabIndex));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 //删除被提交的数据
                 datas.remove(datas.get(currentTabIndex));
-                datas.get(currentTabIndex);
                 //删除当前选中的tab
                 topTabs.removeTabAt(topTabs.getSelectedTabPosition());
+            }
+        });
+        //设置充装前的radioGroup
+        rgSurfaceBefore.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId==R.id.radioSurfaceBeforeGood){
+                    //充装前外观
+                    datas.get(currentTabIndex).setSurfaceBefore(1);
+                }else{
+                    datas.get(currentTabIndex).setSurfaceBefore(0);
+                }
+            }
+        });
+        //设置充装前泄漏
+        rgLeakBefore.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId==R.id.radioLeakBeforeYes){
+                    //充装前外观
+                    datas.get(currentTabIndex).setLeakBefore(1);
+                }else{
+                    datas.get(currentTabIndex).setLeakBefore(0);
+                }
+            }
+        });
+        //设置充装后外观
+        rgSufaceAfter.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId==R.id.radioSufaceAfterGood){
+                    //充装前外观
+                    datas.get(currentTabIndex).setSurfaceAfter(1);
+                }else{
+                    datas.get(currentTabIndex).setSurfaceAfter(0);
+                }
+            }
+        });
+        //设置充装后泄漏
+        rgLeakAfter.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if(checkedId==R.id.radioLeakAfterYes){
+                    //充装前外观
+                    datas.get(currentTabIndex).setLeakAfter(1);
+                }else{
+                    datas.get(currentTabIndex).setLeakAfter(0);
+                }
             }
         });
     }
@@ -192,32 +246,27 @@ public class MainActivity extends AppCompatActivity {
         settingDialog.show();
     }
     //读取当前的数据
-    private void  readCurrentData(CheckRecorderEntity entity){
+    private void  readCurrentData(CheckRecorderEntity entity){}
 
-    }
+
     //保存当前的数据
-    private void commitData(CheckRecorderEntity entity){
+    private void commitData(CheckRecorderEntity entity) throws ParseException {
         //气瓶号
         entity.setCylinderNumber(cylinderNumber.getText().toString());
         //有效期
-        entity.setValidityPeriod(new Date(validityDate.getText().toString()));
+        String validDate =etValidityDate.getText().toString();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        entity.setValidityPeriod(sdf.parse(validDate));
         //枪编号
-        entity.setGunNumber(gunNumber.toString());
-        //充装前外观
-        entity.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
-        //充装前泄漏
-        entity.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId());
-        //充装后外观
-        entity.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId());
-        //充装后泄漏
-        entity.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
+        entity.setGunNumber(gunNumber.getSelectedItem().toString());
         //图片文件名,从签字返回的result中赋值
         entity.setSignFile(imageFileName);
         //检查员
-        entity.setCheckOperator(spCheckOperator.toString());
+        entity.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
-        entity.setFillOperator(spFillOperator.toString());
+        entity.setFillOperator(spFillOperator.getSelectedItem().toString());
         Toast.makeText(this,JSON.toJSONString(entity),LENGTH_LONG).show();
+        Log.i("commit data---",JSON.toJSONString(entity));
         //充装前余压
         //充装开始时间
         //充装后压力

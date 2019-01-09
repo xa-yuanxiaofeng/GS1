@@ -109,8 +109,9 @@
                     <EditText
                         android:id="@+id/validDate"
                         android:layout_height="wrap_content"
-                        android:layout_width="125dp"
+                        android:layout_width="150dp"
                         android:textSize="30sp"
+                        android:ems="10"
                         android:inputType="date"/>
 
                     <TextView
@@ -128,6 +129,7 @@
                         android:ems="10"
                         android:entries="@array/ganNumber"
                         android:inputType="textPersonName"
+                        android:textSize="30sp"
                         style="@style/spinnerSize"/>
                 </LinearLayout>
 
@@ -204,14 +206,14 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="是"
-                                    android:textSize="24sp" />
+                                    android:textSize="30sp" />
 
                                 <RadioButton
                                     android:id="@+id/radioLeakBeforeNo"
                                     android:layout_width="80dp"
                                     android:layout_height="wrap_content"
                                     android:text="否"
-                                    android:textSize="24sp" />
+                                    android:textSize="30sp" />
                             </RadioGroup>
                         </LinearLayout>
 
@@ -275,14 +277,14 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="是"
-                                    android:textSize="24sp" />
+                                    android:textSize="30sp" />
 
                                 <RadioButton
                                     android:id="@+id/radioLeakAfterNo"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="否"
-                                    android:textSize="24sp" />
+                                    android:textSize="30sp" />
                             </RadioGroup>
                         </LinearLayout>
 
