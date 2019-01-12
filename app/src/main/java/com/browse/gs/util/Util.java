@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.Spinner;
 
 import java.io.File;
 
@@ -57,6 +58,16 @@ public class Util {
             if(bt != null && !bt.isRecycled())
                 bt.recycle();
             bt = null;
+        }
+    }
+
+    //根据spinner的值设定显示
+    public static void setSpinnerSelectItem(Spinner spinner ,String value){
+        int length = spinner.getAdapter().getCount();
+        for(int i=0;i<length;i++) {
+            if (spinner.getItemAtPosition(i).toString()==value) {
+                spinner.setSelection(i);
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     public EditText etValidityDate;
     //加气枪编号
     @BindView(R.id.spGunNumber)
-    public Spinner gunNumber;
+    public Spinner spGunNumber;
     //充装前外观
     @BindView(R.id.rgSurfaceBefore)
     public RadioGroup rgSurfaceBefore;
@@ -140,14 +141,21 @@ public class MainActivity extends AppCompatActivity {
                 plateNumbers
         );
         leftListView.setAdapter(leftListViewAdapter);
-        //设置listview点击事件
+
+
+        // topTabs初始化
+        this.setPath();
+    }
+
+    private void initEvent() {
+        //设置listview点击事件，增加tab，删除列表项
         leftListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //topTab加入选中的车牌
                 String selectedPN =plateNumbers.get(i);
+                //tab和datas同增同删，数据列表中加入检查的实体数据,用车牌号构造，
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
-                //数据列表中加入检查的实体数据,用车牌号构造
                 datas.add(new CheckRecorderEntity(selectedPN));
                 //设置当前选中的tab
                 currentTabIndex = topTabs.getTabCount()-1;
@@ -157,12 +165,36 @@ public class MainActivity extends AppCompatActivity {
                 leftListViewAdapter.notifyDataSetChanged();
             }
         });
+        //tab切换时刷新页面数据，确保显示当前被选中的index的数据
+        topTabs.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                try {
+                    //第一次还没有数据时，直接返回
+                    if(datas.size()==0)
+                        return;
+                    //1保存数据
+                    saveData(datas.get(currentTabIndex));
+                    //2设置当前被选中的tab
+                    currentTabIndex= tab.getPosition();
+                    //3重新读取数据
+                    readData(datas.get(currentTabIndex));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
 
-        // topTabs初始化
-        this.setPath();
-    }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
 
-    private void initEvent() {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
+
         btSetting.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -180,13 +212,12 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //提交数据
                 try {
-                    commitData(datas.get(currentTabIndex));
+                    saveData(datas.get(currentTabIndex));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                //删除被提交的数据
+                //同增同删，删除被提交的数据
                 datas.remove(datas.get(currentTabIndex));
-                //删除当前选中的tab
                 topTabs.removeTabAt(topTabs.getSelectedTabPosition());
             }
         });
@@ -245,33 +276,59 @@ public class MainActivity extends AppCompatActivity {
         settingDialog= new SettingDialog(this);
         settingDialog.show();
     }
-    //读取当前的数据
-    private void  readCurrentData(CheckRecorderEntity entity){}
+
 
 
     //保存当前的数据
-    private void commitData(CheckRecorderEntity entity) throws ParseException {
+    private void saveData(CheckRecorderEntity entity) throws ParseException {
         //气瓶号
         entity.setCylinderNumber(cylinderNumber.getText().toString());
         //有效期
         String validDate =etValidityDate.getText().toString();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-        entity.setValidityPeriod(sdf.parse(validDate));
+        if(validDate!=null&&validDate.length()==8)
+            entity.setValidityPeriod(new SimpleDateFormat("yyyyMMdd").parse(validDate));
         //枪编号
-        entity.setGunNumber(gunNumber.getSelectedItem().toString());
+        entity.setGunNumber(spGunNumber.getSelectedItem().toString());
         //图片文件名,从签字返回的result中赋值
         entity.setSignFile(imageFileName);
         //检查员
         entity.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
         entity.setFillOperator(spFillOperator.getSelectedItem().toString());
-        Toast.makeText(this,JSON.toJSONString(entity),LENGTH_LONG).show();
         Log.i("commit data---",JSON.toJSONString(entity));
         //充装前余压
         //充装开始时间
         //充装后压力
         //充装结束时间
 
+    }
+    //从内存实体中读取当前数据
+    private void readData(CheckRecorderEntity entity)throws ParseException{
+        //气瓶号
+        cylinderNumber.setText(entity.getCylinderNumber());
+        //有效期
+        Date tempDate =entity.getValidityPeriod();
+        //如果日期为空
+        if(tempDate==null)
+            etValidityDate.setText("");
+        //否则
+        else{
+            etValidityDate.setText(new SimpleDateFormat("yyyyMMdd").format(tempDate));
+        }
+        //枪编号
+        Util.setSpinnerSelectItem(spGunNumber,entity.getGunNumber());
+        //图片文件名,从签字返回的result中赋值
+        String imageFileName =entity.getSignFile();
+        //检查员
+        Util.setSpinnerSelectItem(spCheckOperator,entity.getCheckOperator());
+        //充装员
+        Util.setSpinnerSelectItem(spFillOperator,entity.getFillOperator());
+        //充装前余压
+        //充装开始时间
+        //充装后压力
+        //充装结束时间
+
+        //刷新页面
     }
     //弹出签字界面
     public void popSignPane(View view){
@@ -331,6 +388,7 @@ public class MainActivity extends AppCompatActivity {
         File directory = cw.getFilesDir();
         Util.setSharedPreference(this, "FileDir", directory.getAbsolutePath() +"/");
     }
+
 }
 
 
