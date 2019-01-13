@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 
 import java.io.File;
@@ -69,5 +70,10 @@ public class Util {
                 spinner.setSelection(i);
             }
         }
+    }
+    //根据radioGroup的值设定显示
+    public static  void setRadoiGroupSelectItem(RadioGroup radioGroup,int value)
+    {
+        radioGroup.check(value);
     }
 }

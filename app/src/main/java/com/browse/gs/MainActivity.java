@@ -114,6 +114,9 @@ public class MainActivity extends AppCompatActivity {
     SettingDialog settingDialog;
     private ArrayList<String> plateNumbers= new ArrayList<String>();
 
+    //日期数据格式
+    SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -286,9 +289,17 @@ public class MainActivity extends AppCompatActivity {
         //有效期
         String validDate =etValidityDate.getText().toString();
         if(validDate!=null&&validDate.length()==8)
-            entity.setValidityPeriod(new SimpleDateFormat("yyyyMMdd").parse(validDate));
+            entity.setValidityPeriod(simpleDateFormat.parse(validDate));
         //枪编号
         entity.setGunNumber(spGunNumber.getSelectedItem().toString());
+        //充装前外观
+        entity.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
+        //充装前泄漏
+        entity.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId());
+        //充装后外观
+        entity.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId());
+        //充装后泄漏
+        entity.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
         //图片文件名,从签字返回的result中赋值
         entity.setSignFile(imageFileName);
         //检查员
@@ -313,10 +324,18 @@ public class MainActivity extends AppCompatActivity {
             etValidityDate.setText("");
         //否则
         else{
-            etValidityDate.setText(new SimpleDateFormat("yyyyMMdd").format(tempDate));
+            etValidityDate.setText(simpleDateFormat.format(tempDate));
         }
         //枪编号
         Util.setSpinnerSelectItem(spGunNumber,entity.getGunNumber());
+        //充装前外观
+        rgSurfaceBefore.check(entity.getSurfaceBefore());
+        //充装前泄漏
+        rgLeakBefore.check(entity.getLeakBefore());
+        //充装后外观
+        rgSufaceAfter.check(entity.getSurfaceAfter());
+        //充装后泄漏
+        rgLeakAfter.check(entity.getLeakAfter());
         //图片文件名,从签字返回的result中赋值
         String imageFileName =entity.getSignFile();
         //检查员
