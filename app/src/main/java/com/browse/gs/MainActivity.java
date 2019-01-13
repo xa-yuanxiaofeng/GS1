@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.tlTop)
     TabLayout topTabs;
     //当前被选中的tab
-    int currentTabIndex =0;
+    int pointer =-1;
     //页面数据链表
     ArrayList<CheckRecorderEntity> datas=new ArrayList<CheckRecorderEntity>();
 
@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity {
     //签字图片
     @BindView(R.id.signImage)
     public ImageView signImage;
-    public String imageFileName;
 
     //配置对话框
     SettingDialog settingDialog;
@@ -155,15 +154,23 @@ public class MainActivity extends AppCompatActivity {
         leftListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //topTab加入选中的车牌
+                //指针加1
+                pointer++;
+                //增加实体数据
                 String selectedPN =plateNumbers.get(i);
                 //tab和datas同增同删，数据列表中加入检查的实体数据,用车牌号构造，
+                CheckRecorderEntity entity =new CheckRecorderEntity(selectedPN);
+                datas.add(entity);
+                //设定4个radio选项默认值
+                entity.setSurfaceBefore(R.id.radioSurfaceBeforeGood);
+                entity.setLeakBefore(R.id.radioLeakBeforeNo);
+                entity.setSurfaceAfter(R.id.radioSufaceAfterGood);
+                entity.setLeakAfter(R.id.radioLeakAfterNo);
+
+                //tab和datas同增同删
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
-                datas.add(new CheckRecorderEntity(selectedPN));
-                //设置当前选中的tab
-                currentTabIndex = topTabs.getTabCount()-1;
-                topTabs.getTabAt(currentTabIndex).select();
-                //自身列表中删除
+                topTabs.getTabAt(pointer).select();
+                //左列表中删除
                 plateNumbers.remove(i);
                 leftListViewAdapter.notifyDataSetChanged();
             }
@@ -177,11 +184,11 @@ public class MainActivity extends AppCompatActivity {
                     if(datas.size()==0)
                         return;
                     //1保存数据
-                    saveData(datas.get(currentTabIndex));
+                    saveData(datas.get(pointer));
                     //2设置当前被选中的tab
-                    currentTabIndex= tab.getPosition();
+                    pointer= tab.getPosition();
                     //3重新读取数据
-                    readData(datas.get(currentTabIndex));
+                    readData(datas.get(pointer));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -189,7 +196,6 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
             }
 
             @Override
@@ -215,13 +221,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //提交数据
                 try {
-                    saveData(datas.get(currentTabIndex));
+                    saveData(datas.get(pointer));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
                 //同增同删，删除被提交的数据
-                datas.remove(datas.get(currentTabIndex));
-                topTabs.removeTabAt(topTabs.getSelectedTabPosition());
+                datas.remove(datas.get(pointer));
+                topTabs.removeTabAt(pointer);
+                pointer--;
             }
         });
         //设置充装前的radioGroup
@@ -230,9 +237,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if(checkedId==R.id.radioSurfaceBeforeGood){
                     //充装前外观
-                    datas.get(currentTabIndex).setSurfaceBefore(1);
+                    datas.get(pointer).setSurfaceBefore(1);
                 }else{
-                    datas.get(currentTabIndex).setSurfaceBefore(0);
+                    datas.get(pointer).setSurfaceBefore(0);
                 }
             }
         });
@@ -242,9 +249,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if(checkedId==R.id.radioLeakBeforeYes){
                     //充装前外观
-                    datas.get(currentTabIndex).setLeakBefore(1);
+                    datas.get(pointer).setLeakBefore(1);
                 }else{
-                    datas.get(currentTabIndex).setLeakBefore(0);
+                    datas.get(pointer).setLeakBefore(0);
                 }
             }
         });
@@ -254,9 +261,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if(checkedId==R.id.radioSufaceAfterGood){
                     //充装前外观
-                    datas.get(currentTabIndex).setSurfaceAfter(1);
+                    datas.get(pointer).setSurfaceAfter(1);
                 }else{
-                    datas.get(currentTabIndex).setSurfaceAfter(0);
+                    datas.get(pointer).setSurfaceAfter(0);
                 }
             }
         });
@@ -266,9 +273,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if(checkedId==R.id.radioLeakAfterYes){
                     //充装前外观
-                    datas.get(currentTabIndex).setLeakAfter(1);
+                    datas.get(pointer).setLeakAfter(1);
                 }else{
-                    datas.get(currentTabIndex).setLeakAfter(0);
+                    datas.get(pointer).setLeakAfter(0);
                 }
             }
         });
@@ -301,12 +308,11 @@ public class MainActivity extends AppCompatActivity {
         //充装后泄漏
         entity.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
         //图片文件名,从签字返回的result中赋值
-        entity.setSignFile(imageFileName);
+        //entity.setSignFile(imageFileName);
         //检查员
         entity.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
         entity.setFillOperator(spFillOperator.getSelectedItem().toString());
-        Log.i("commit data---",JSON.toJSONString(entity));
         //充装前余压
         //充装开始时间
         //充装后压力
@@ -336,18 +342,24 @@ public class MainActivity extends AppCompatActivity {
         rgSufaceAfter.check(entity.getSurfaceAfter());
         //充装后泄漏
         rgLeakAfter.check(entity.getLeakAfter());
-        //图片文件名,从签字返回的result中赋值
-        String imageFileName =entity.getSignFile();
-        //检查员
+        //设置检查员
         Util.setSpinnerSelectItem(spCheckOperator,entity.getCheckOperator());
-        //充装员
+        //设置充装员
         Util.setSpinnerSelectItem(spFillOperator,entity.getFillOperator());
+        //设置签名，图片文件名,从签字返回的result中赋值
+        String imageFileName =entity.getSignFile();
+        if(imageFileName!=null&&Util.fileExists(imageFileName)){
+            //显示签名图片
+            Bitmap bmp = Util.getBitmapThumbnail(imageFileName, 150,105);
+            Util.releaseBitmap(signImage);
+            signImage.setImageBitmap(bmp);
+        }else
+            signImage.setImageDrawable(null);
+           // signImage.setWillNotDraw(true);
         //充装前余压
         //充装开始时间
         //充装后压力
         //充装结束时间
-
-        //刷新页面
     }
     //弹出签字界面
     public void popSignPane(View view){
@@ -364,6 +376,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode,
                                     Intent intent) {
         Bitmap bmp;
+        String imageFileName;
         super.onActivityResult(requestCode, resultCode, intent);
         if (intent == null)
             return;
@@ -394,7 +407,8 @@ public class MainActivity extends AppCompatActivity {
                     signImage.setImageBitmap(bmp);
                 }
             }
-
+            //设置签名文件的名字
+            datas.get(pointer).setSignFile(imageFileName);
         } catch (Exception e) {
             Toast.makeText(this, "----------" + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
