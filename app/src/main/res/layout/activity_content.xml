@@ -295,8 +295,7 @@
                 <Spinner
                     android:id="@+id/spinner"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:entries="@array/operator" />
+                    android:layout_height="wrap_content"/>
 
                 <TextView
                     android:id="@+id/textView13"
@@ -310,7 +309,7 @@
                     android:id="@+id/spinner2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:entries="@array/operator" />
+                     />
                 <Button
                     android:id="@+id/buttonFinish"
                     android:layout_width="wrap_content"

@@ -201,12 +201,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal">
-
-
-
                                 <RadioButton
                                     android:id="@+id/radioLeakBeforeNo"
-                                    android:layout_width="80dp"
+                                    android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="否"
                                     android:checked="true"
@@ -326,6 +323,21 @@
                                 android:layout_marginRight="50dp"
                                 android:ems="10"
                                 android:inputType="datetime" />
+
+                            <TextView
+                                android:id="@+id/textView1111"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="50dp"
+                                android:text="充装压力:"
+                                android:textSize="30sp" />
+
+                            <TextView
+                                android:id="@+id/tvGasPress"
+                                android:layout_width="14dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="50dp"
+                                android:ems="10"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -363,6 +375,22 @@
                                 android:layout_marginRight="50dp"
                                 android:ems="10"
                                 android:inputType="datetime" />
+
+                            <TextView
+                                android:id="@+id/textView121"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="50dp"
+                                android:text="充装气量:"
+                                android:textSize="30sp" />
+
+                            <TextView
+                                android:id="@+id/tvGasCubage"
+                                android:layout_width="12dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginRight="50dp"
+                                android:ems="10"
+                                android:inputType="datetime" />
                         </LinearLayout>
 
                         <LinearLayout
@@ -382,7 +410,7 @@
                                 android:id="@+id/spCheckOperator"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:entries="@array/operator" />
+                                 />
 
                             <TextView
                                 android:id="@+id/textView13"
@@ -396,21 +424,15 @@
                                 android:id="@+id/spFillOperator"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:entries="@array/operator" />
-                            <Button
-                                android:id="@+id/buttonFinish"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="完成"
-                                android:layout_marginLeft="50dp"
-                                />
+                                 />
+
                         </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="3"
+                        android:layout_weight="2"
                         android:orientation="vertical">
 
                         <LinearLayout
@@ -423,13 +445,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="司机签名:"
-                                android:textSize="30sp" />
+                                android:textSize="30sp"
+                                android:layout_gravity="right|center_vertical"/>
                             <Button
                                 android:id="@+id/button"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="签字"
-                                android:onClick="popSignPane"/>
+                                android:onClick="popSignPane"
+                                android:layout_gravity="right|center_vertical"/>
                         </LinearLayout>
 
                         <LinearLayout
@@ -442,9 +466,23 @@
                             <ImageView
                                 android:id="@+id/signImage"
                                 android:layout_width="match_parent"
-                                android:layout_height="271dp" />
+                                android:layout_height="174dp" />
 
                         </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="150dp">
+                            <Button
+                                android:id="@+id/buttonFinish"
+                                android:layout_width="100dp"
+                                android:layout_height="80dp"
+                                android:text="完成"
+                                android:layout_marginLeft="50dp"
+                                android:layout_marginBottom="80dp"
+                                />
+                        </LinearLayout>
+
                     </LinearLayout>
                 </LinearLayout>
 

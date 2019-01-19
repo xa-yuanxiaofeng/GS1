@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.browse.gs.adpter.MySpinnerAdapter;
 import com.browse.gs.util.Util;
 
 import org.json.JSONArray;
@@ -50,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.lvLeft)
     ListView leftListView;
     private ArrayAdapter<String> leftListViewAdapter;
+    //新增标志位
+    private boolean newFlag=false;
 
     //设置按钮
     @BindView(R.id.btSetting)
@@ -58,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     Button btExit;
     @BindView(R.id.buttonFinish)
     Button btFinish;
+    //完成标志位
+    private boolean finishFlag=false;
     //上面tab
     @BindView(R.id.tlTop)
     TabLayout topTabs;
@@ -93,12 +98,18 @@ public class MainActivity extends AppCompatActivity {
     //充装开始时间
     @BindView(R.id.tvStartTime)
     public TextView tvStartTime;
+    //充装压力
+    @BindView(R.id.tvGasPress)
+    public TextView tvGasPress;
     //充装后压力
     @BindView(R.id.tvPressAfter)
     public TextView tvPressAfter;
     //充装结束时间
     @BindView(R.id.tvEndTime)
     public TextView tvEndTime;
+    //充装气量
+    @BindView(R.id.tvGasCubage)
+    public TextView tvGasCubage;
     //检查员
     @BindView(R.id.spCheckOperator)
     public Spinner spCheckOperator;
@@ -143,7 +154,10 @@ public class MainActivity extends AppCompatActivity {
                 plateNumbers
         );
         leftListView.setAdapter(leftListViewAdapter);
-
+        //3个spinner，设置适配器（控制器）
+        spGunNumber.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.ganNumber)));
+        spCheckOperator.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.checkOperator)));
+        spFillOperator.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.fillOperator)));
 
         // topTabs初始化
         this.setPath();
@@ -154,25 +168,25 @@ public class MainActivity extends AppCompatActivity {
         leftListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //指针加1
-                pointer++;
+                //新增产生的选择事件
+                newFlag=true;
                 //增加实体数据
                 String selectedPN =plateNumbers.get(i);
                 //tab和datas同增同删，数据列表中加入检查的实体数据,用车牌号构造，
                 CheckRecorderEntity entity =new CheckRecorderEntity(selectedPN);
-                datas.add(entity);
                 //设定4个radio选项默认值
                 entity.setSurfaceBefore(R.id.radioSurfaceBeforeGood);
                 entity.setLeakBefore(R.id.radioLeakBeforeNo);
                 entity.setSurfaceAfter(R.id.radioSufaceAfterGood);
                 entity.setLeakAfter(R.id.radioLeakAfterNo);
-
                 //tab和datas同增同删
+                datas.add(entity);
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
-                topTabs.getTabAt(pointer).select();
+
                 //左列表中删除
                 plateNumbers.remove(i);
                 leftListViewAdapter.notifyDataSetChanged();
+                finishFlag=true;
             }
         });
         //tab切换时刷新页面数据，确保显示当前被选中的index的数据
@@ -180,15 +194,29 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 try {
-                    //第一次还没有数据时，直接返回
-                    if(datas.size()==0)
+                    if(pointer<0)
                         return;
-                    //1保存数据
-                    saveData(datas.get(pointer));
-                    //2设置当前被选中的tab
-                    pointer= tab.getPosition();
-                    //3重新读取数据
-                    readData(datas.get(pointer));
+                    //页面新增时的页面选择
+                    if(newFlag){
+                        pointer= tab.getPosition();
+                        topTabs.getTabAt(pointer).select();
+                        finishFlag=false;
+                    }
+                    //完成提交时的页面选择
+                    else if(finishFlag){
+                        newFlag=false;
+                    }else{
+                        //tab切换时的页面选择
+                        finishFlag=false;
+                        newFlag=false;
+                        //由tab的切换产生的select事件
+                        //1保存数据
+                        saveData(datas.get(pointer));
+                        //2设置当前被选中的tab
+                        pointer= tab.getPosition();
+                        //3重新读取数据
+                        readData(datas.get(pointer));
+                    }
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
@@ -219,14 +247,20 @@ public class MainActivity extends AppCompatActivity {
         btFinish.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
+                if(pointer<0){
+                    Toast toast=Toast.makeText(getApplicationContext(),"没有车牌",Toast.LENGTH_SHORT);
+                    toast.show();
+                    return;
+                }
+
                 //提交数据
                 try {
                     saveData(datas.get(pointer));
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                //同增同删，删除被提交的数据
-                datas.remove(datas.get(pointer));
+                //同增同删，删除被提交的数据,指针减一
+                datas.remove(pointer);
                 topTabs.removeTabAt(pointer);
                 pointer--;
             }
@@ -315,9 +349,10 @@ public class MainActivity extends AppCompatActivity {
         entity.setFillOperator(spFillOperator.getSelectedItem().toString());
         //充装前余压
         //充装开始时间
+        //充装压力
         //充装后压力
         //充装结束时间
-
+        //充装气量
     }
     //从内存实体中读取当前数据
     private void readData(CheckRecorderEntity entity)throws ParseException{

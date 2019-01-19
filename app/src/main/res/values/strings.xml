@@ -13,12 +13,6 @@
         <item>黑576573</item>
         <item>宁83432w</item>
     </string-array>
-    <string-array name="operator">
-        <item>张三</item>
-        <item>李四</item>
-        <item>王五</item>
-        <item>张三丰</item>
-    </string-array>
     <string-array name="ganNumber">
         <item>1号枪</item>
         <item>2号枪</item>
@@ -29,6 +23,18 @@
         <item>7号枪</item>
         <item>8号枪</item>
         <item>9号枪</item>
+    </string-array>
+    <string-array name="checkOperator">
+        <item>张三</item>
+        <item>李四</item>
+        <item>王五</item>
+        <item>张三丰</item>
+    </string-array>
+    <string-array name="fillOperator">
+        <item>张三</item>
+        <item>李四</item>
+        <item>王五</item>
+        <item>张三丰</item>
     </string-array>
     <string-array name="ganMachine">
         <item>1号加气机</item>
