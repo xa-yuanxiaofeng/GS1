@@ -179,8 +179,6 @@ public class MainActivity extends AppCompatActivity {
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
                 //校正指针
                 pointer=datas.size()-1;
-                topTabs.getTabAt(pointer).select();
-
 
                 //左列表中删除
                 plateNumbers.remove(i);
@@ -246,9 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 //同增同删，删除被提交的数据,指针减一
                 datas.remove(pointer);
                 topTabs.removeTabAt(pointer);
-                //校正指针
-                pointer=datas.size()-1;
-                topTabs.getTabAt(pointer).select();
+                if(pointer>0) pointer--;
             }
         });
         //设置充装前的radioGroup
