@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     Button btExit;
     @BindView(R.id.buttonFinish)
     Button btFinish;
+    boolean isFinishSelected=false;
 
     //上面tab
     @BindView(R.id.tlTop)
@@ -191,12 +192,16 @@ public class MainActivity extends AppCompatActivity {
                 int oldPointer=pointer;
                 pointer=tab.getPosition();
                 try {
+                    //页面完成关闭时，产生的selected事件，直接显示
+                    if(isFinishSelected){
+                        isFinishSelected=false;
+                        readData(pointer);
+                    }else {
                         //1保存数据
-                        if(oldPointer>-1)
-                        saveData(datas.get(oldPointer));
+                            saveData(oldPointer);
                         //3重新读取数据
-                        if(pointer>-1)
-                        readData(datas.get(pointer));
+                            readData(pointer);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -227,25 +232,19 @@ public class MainActivity extends AppCompatActivity {
         btFinish.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                if(pointer<0){
-                    Toast toast=Toast.makeText(getApplicationContext(),"没有车牌",Toast.LENGTH_SHORT);
-                    toast.show();
-                    return;
-                }
-
+                int oldPointer=pointer;
+                pointer--;
                 //提交数据
                 try {
-                    saveData(datas.get(pointer));
+                    saveData(oldPointer);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
                 //同增同删，删除被提交的数据,指针减一
-                int oldPointer=pointer;
-                pointer--;
                 datas.remove(oldPointer);
                 topTabs.removeTabAt(oldPointer);
-                if(pointer>0)
-                    topTabs.getTabAt(pointer).select();
+                isFinishSelected=true;
+
             }
         });
         //设置充装前的radioGroup
@@ -307,7 +306,10 @@ public class MainActivity extends AppCompatActivity {
 
 
     //保存当前的数据
-    private void saveData(CheckRecorderEntity entity) throws ParseException {
+    private void saveData(int _pointer) throws ParseException {
+        if(_pointer==-1)
+            return;
+        CheckRecorderEntity entity =datas.get(_pointer);
         //气瓶号
         entity.setCylinderNumber(cylinderNumber.getText().toString());
         //有效期
@@ -338,7 +340,10 @@ public class MainActivity extends AppCompatActivity {
         //充装气量
     }
     //从内存实体中读取当前数据
-    private void readData(CheckRecorderEntity entity)throws ParseException{
+    private void readData(int _pointer)throws ParseException{
+        if(_pointer==-1)
+            return;
+        CheckRecorderEntity entity =datas.get(_pointer);
         //气瓶号
         cylinderNumber.setText(entity.getCylinderNumber());
         //有效期
