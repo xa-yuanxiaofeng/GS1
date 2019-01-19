@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.lvLeft)
     ListView leftListView;
     private ArrayAdapter<String> leftListViewAdapter;
-    //新增标志位
-    private boolean newFlag=false;
 
     //设置按钮
     @BindView(R.id.btSetting)
@@ -61,8 +59,7 @@ public class MainActivity extends AppCompatActivity {
     Button btExit;
     @BindView(R.id.buttonFinish)
     Button btFinish;
-    //完成标志位
-    private boolean finishFlag=false;
+
     //上面tab
     @BindView(R.id.tlTop)
     TabLayout topTabs;
@@ -168,8 +165,6 @@ public class MainActivity extends AppCompatActivity {
         leftListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //新增产生的选择事件
-                newFlag=true;
                 //增加实体数据
                 String selectedPN =plateNumbers.get(i);
                 //tab和datas同增同删，数据列表中加入检查的实体数据,用车牌号构造，
@@ -182,11 +177,12 @@ public class MainActivity extends AppCompatActivity {
                 //tab和datas同增同删
                 datas.add(entity);
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
+                //校正指针
+                pointer=datas.size()-1;
 
                 //左列表中删除
                 plateNumbers.remove(i);
                 leftListViewAdapter.notifyDataSetChanged();
-                finishFlag=true;
             }
         });
         //tab切换时刷新页面数据，确保显示当前被选中的index的数据
@@ -196,28 +192,14 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     if(pointer<0)
                         return;
-                    //页面新增时的页面选择
-                    if(newFlag){
-                        pointer= tab.getPosition();
-                        topTabs.getTabAt(pointer).select();
-                        finishFlag=false;
-                    }
-                    //完成提交时的页面选择
-                    else if(finishFlag){
-                        newFlag=false;
-                    }else{
-                        //tab切换时的页面选择
-                        finishFlag=false;
-                        newFlag=false;
                         //由tab的切换产生的select事件
                         //1保存数据
-                        saveData(datas.get(pointer));
+                       // saveData(datas.get(pointer));
                         //2设置当前被选中的tab
                         pointer= tab.getPosition();
                         //3重新读取数据
-                        readData(datas.get(pointer));
-                    }
-                } catch (ParseException e) {
+                        //readData(datas.get(pointer));
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -262,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 //同增同删，删除被提交的数据,指针减一
                 datas.remove(pointer);
                 topTabs.removeTabAt(pointer);
+                //校正指针
                 pointer--;
             }
         });
