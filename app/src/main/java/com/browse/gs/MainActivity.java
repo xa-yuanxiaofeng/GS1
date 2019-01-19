@@ -179,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
                 topTabs.addTab(topTabs.newTab().setText(selectedPN ));
                 //校正指针
                 pointer=datas.size()-1;
+                topTabs.getTabAt(pointer).select();
+
 
                 //左列表中删除
                 plateNumbers.remove(i);
@@ -194,11 +196,11 @@ public class MainActivity extends AppCompatActivity {
                         return;
                         //由tab的切换产生的select事件
                         //1保存数据
-                       // saveData(datas.get(pointer));
+                        saveData(datas.get(pointer));
                         //2设置当前被选中的tab
                         pointer= tab.getPosition();
                         //3重新读取数据
-                        //readData(datas.get(pointer));
+                        readData(datas.get(pointer));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -245,7 +247,8 @@ public class MainActivity extends AppCompatActivity {
                 datas.remove(pointer);
                 topTabs.removeTabAt(pointer);
                 //校正指针
-                pointer--;
+                pointer=datas.size()-1;
+                topTabs.getTabAt(pointer).select();
             }
         });
         //设置充装前的radioGroup
