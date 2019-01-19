@@ -176,10 +176,9 @@ public class MainActivity extends AppCompatActivity {
                 entity.setLeakAfter(R.id.radioLeakAfterNo);
                 //tab和datas同增同删
                 datas.add(entity);
-                topTabs.addTab(topTabs.newTab().setText(selectedPN ));
+                topTabs.addTab(topTabs.newTab().setText(selectedPN ),true);
                 //校正指针
                 pointer=datas.size()-1;
-
                 //左列表中删除
                 plateNumbers.remove(i);
                 leftListViewAdapter.notifyDataSetChanged();
@@ -189,15 +188,14 @@ public class MainActivity extends AppCompatActivity {
         topTabs.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+                int oldPointer=pointer;
+                pointer=tab.getPosition();
                 try {
-                    if(pointer<0)
-                        return;
-                        //由tab的切换产生的select事件
                         //1保存数据
-                        saveData(datas.get(pointer));
-                        //2设置当前被选中的tab
-                        pointer= tab.getPosition();
+                        if(oldPointer>-1)
+                        saveData(datas.get(oldPointer));
                         //3重新读取数据
+                        if(pointer>-1)
                         readData(datas.get(pointer));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -242,9 +240,12 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 //同增同删，删除被提交的数据,指针减一
-                datas.remove(pointer);
-                topTabs.removeTabAt(pointer);
-                if(pointer>0) pointer--;
+                int oldPointer=pointer;
+                pointer--;
+                datas.remove(oldPointer);
+                topTabs.removeTabAt(oldPointer);
+                if(pointer>0)
+                    topTabs.getTabAt(pointer).select();
             }
         });
         //设置充装前的radioGroup
