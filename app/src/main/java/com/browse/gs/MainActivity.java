@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     Button btExit;
     @BindView(R.id.buttonFinish)
     Button btFinish;
-    boolean isFinishSelected=false;
+    boolean isFinish=false;
 
     //上面tab
     @BindView(R.id.tlTop)
@@ -193,8 +193,8 @@ public class MainActivity extends AppCompatActivity {
                 pointer=tab.getPosition();
                 try {
                     //页面完成关闭时，产生的selected事件，直接显示
-                    if(isFinishSelected){
-                        isFinishSelected=false;
+                    if(isFinish){
+                        isFinish=false;
                         readData(pointer);
                     }else {
                         //1保存数据
@@ -234,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int oldPointer=pointer;
                 pointer--;
+                isFinish=true;
                 //提交数据
                 try {
                     saveData(oldPointer);
@@ -243,8 +244,6 @@ public class MainActivity extends AppCompatActivity {
                 //同增同删，删除被提交的数据,指针减一
                 datas.remove(oldPointer);
                 topTabs.removeTabAt(oldPointer);
-                isFinishSelected=true;
-
             }
         });
         //设置充装前的radioGroup
