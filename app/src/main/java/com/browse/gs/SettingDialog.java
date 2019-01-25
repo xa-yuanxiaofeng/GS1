@@ -3,6 +3,7 @@ package com.browse.gs;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
@@ -86,8 +87,7 @@ public class SettingDialog extends Dialog {
         init();
         initEvent();
 
-        //读取本地设置
-        readFromSharedPreference();
+
         this.setCancelable(true);
     }
 
@@ -97,6 +97,8 @@ public class SettingDialog extends Dialog {
         gunCode1.setAdapter(new MySpinnerAdapter(context,context.getResources().getStringArray(R.array.gunCode)));
         gunCode2.setAdapter(new MySpinnerAdapter(context,context.getResources().getStringArray(R.array.gunCode)));
         gunCode3.setAdapter(new MySpinnerAdapter(context,context.getResources().getStringArray(R.array.gunCode)));
+        //读取本地设置
+        readFromSharedPreference();
     }
     //初始化事件
     private void initEvent(){
@@ -112,6 +114,7 @@ public class SettingDialog extends Dialog {
             @Override
             public void onClick(View v) {
                 saveToSharedPreference();
+                dismiss();
             }
         });
     }
@@ -135,22 +138,27 @@ public class SettingDialog extends Dialog {
             gasName.setText(temp);
         //加气机编号
         temp= getSharedPreference(context,"gasMachineCode");
+        Log.i("---",temp);
         if(temp!=null&&!temp.equals(""))
             Util.setSpinnerSelectItem(gasMachineCode,temp);
         //加气枪0编号
         temp= getSharedPreference(context,"gunCode0");
+        Log.i("---0",temp);
         if(temp!=null&&!temp.equals(""))
             Util.setSpinnerSelectItem(gunCode0,temp);
         //加气枪1编号
         temp= getSharedPreference(context,"gunCode1");
+        Log.i("---1",temp);
         if(temp!=null&&!temp.equals(""))
             Util.setSpinnerSelectItem(gunCode1,temp);
         //加气枪2编号
         temp= getSharedPreference(context,"gunCode2");
+        Log.i("---2",temp);
         if(temp!=null&&!temp.equals(""))
             Util.setSpinnerSelectItem(gunCode2,temp);
         //加气枪3编号
         temp= getSharedPreference(context,"gunCode3");
+        Log.i("---3",temp);
         if(temp!=null&&!temp.equals(""))
             Util.setSpinnerSelectItem(gunCode3,temp);
     }

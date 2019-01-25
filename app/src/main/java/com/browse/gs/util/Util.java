@@ -66,7 +66,7 @@ public class Util {
     public static void setSpinnerSelectItem(Spinner spinner ,String value){
         int length = spinner.getAdapter().getCount();
         for(int i=0;i<length;i++) {
-            if (spinner.getItemAtPosition(i).toString()==value) {
+            if (spinner.getItemAtPosition(i).toString().equals(value)) {
                 spinner.setSelection(i);
             }
         }
