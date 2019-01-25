@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         );
         leftListView.setAdapter(leftListViewAdapter);
         //3个spinner，设置适配器（控制器）
-        spGunNumber.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.ganNumber)));
+        spGunNumber.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.gunCode)));
         spCheckOperator.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.checkOperator)));
         spFillOperator.setAdapter(new MySpinnerAdapter(this,getResources().getStringArray(R.array.fillOperator)));
 
@@ -232,18 +232,20 @@ public class MainActivity extends AppCompatActivity {
         btFinish.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View v) {
-                int oldPointer=pointer;
-                pointer--;
-                isFinish=true;
-                //提交数据
+
                 try {
+                    int oldPointer=pointer;
+                    pointer--;
+                    isFinish=true;
+                    //提交数据
                     saveData(oldPointer);
+                    //同增同删，删除被提交的数据,指针减一
+                    datas.remove(oldPointer);
+                    topTabs.removeTabAt(oldPointer);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                //同增同删，删除被提交的数据,指针减一
-                datas.remove(oldPointer);
-                topTabs.removeTabAt(oldPointer);
+
             }
         });
         //设置充装前的radioGroup

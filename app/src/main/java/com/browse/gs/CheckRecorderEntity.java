@@ -13,10 +13,10 @@ public class CheckRecorderEntity implements Serializable {
     //车牌号
     private String plateNumber="";
     //气瓶号
-    private String CylinderNumber="";
+    private String cylinderNumber="";
     //有效期
     @JSONField(format = "yyyyMMdd")
-    private Date ValidityPeriod;
+    private Date validityPeriod;
     //枪编号
     private String GunNumber="";
     //充装前外观检查
@@ -54,19 +54,19 @@ public class CheckRecorderEntity implements Serializable {
 
 
     public String getCylinderNumber() {
-        return CylinderNumber;
+        return cylinderNumber;
     }
 
     public void setCylinderNumber(String cylinderNumber) {
-        CylinderNumber = cylinderNumber;
+        cylinderNumber = cylinderNumber;
     }
 
     public Date getValidityPeriod() {
-        return ValidityPeriod;
+        return validityPeriod;
     }
 
     public void setValidityPeriod(Date validityPeriod) {
-        ValidityPeriod = validityPeriod;
+        validityPeriod = validityPeriod;
     }
 
     public String getGunNumber() {

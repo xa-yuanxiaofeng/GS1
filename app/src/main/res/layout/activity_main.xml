@@ -127,7 +127,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:ems="10"
-                        android:entries="@array/ganNumber"
+                        android:entries="@array/gunCode"
                         android:inputType="textPersonName"
                         android:textSize="30sp"
                         style="@style/spinnerSize"/>

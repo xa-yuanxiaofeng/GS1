@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="350dp"
     android:orientation="vertical"
     android:layout_marginLeft="200dp">
+
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -44,7 +46,8 @@
             android:id="@+id/gasMachineCode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:entries="@array/ganMachine" />
+            android:entries="@array/gunCode"
+            style="@style/spinnerSize"/>
 
         <TextView
             android:id="@+id/textView17"
@@ -66,11 +69,26 @@
             android:text="加气枪编号:"
             android:textSize="30dp" />
 
-        <ListView
-            android:id="@+id/gunCode"
-            android:layout_width="369dp"
-            android:layout_height="141dp"
-            android:entries="@array/ganNumber" />
+        <Spinner
+            android:id="@+id/gunCode0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/gunCode" />
+        <Spinner
+            android:id="@+id/gunCode1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/gunCode" />
+        <Spinner
+            android:id="@+id/gunCode2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/gunCode" />
+        <Spinner
+            android:id="@+id/gunCode3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:entries="@array/gunCode" />
     </LinearLayout>
 
 
@@ -80,7 +98,7 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/button5"
+            android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="150dp"
@@ -88,7 +106,7 @@
             android:textSize="30sp" />
 
         <Button
-            android:id="@+id/b_cancel"
+            android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="100dp"
