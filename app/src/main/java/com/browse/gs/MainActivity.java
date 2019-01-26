@@ -5,6 +5,8 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -26,11 +28,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.browse.gs.adpter.MySpinnerAdapter;
+import com.browse.gs.util.ConfigConstant;
 import com.browse.gs.util.Util;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+
 
 import java.io.File;
 import java.text.ParseException;
@@ -38,7 +53,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.jar.Attributes;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -122,8 +139,39 @@ public class MainActivity extends AppCompatActivity {
     SettingDialog settingDialog;
     private ArrayList<String> plateNumbers= new ArrayList<String>();
 
+    //读取ServerPool的线程，每1秒刷新一次plateNumbers
+    Thread fetchPoolThread;
+
     //日期数据格式
     SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyyMMdd");
+
+    // httpRequest返回处理
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (1 == msg.what) {
+                super.handleMessage(msg);
+                try {
+                    JSONArray jsonArray=JSONObject.parseArray((String)msg.obj);
+                    List list=   JSONObject.parseArray((String)msg.obj,String.class);
+                    plateNumbers.clear();
+                    plateNumbers.addAll(list);
+                    //左列表
+                    leftListViewAdapter = new ArrayAdapter<String>(
+                            MainActivity.this,
+                            R.layout.plate_number_item,
+                            R.id.plate_item,
+                            plateNumbers
+                    );
+                    leftListView.setAdapter(leftListViewAdapter);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return;
+                }
+
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +207,37 @@ public class MainActivity extends AppCompatActivity {
 
         // topTabs初始化
         this.setPath();
+
+        //启动线程
+        fetchPoolThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+                        //fecthPool 从服务器上读取车牌
+                        CloseableHttpClient httpClient = HttpClients.createDefault();
+                        HttpGet httpGet = new HttpGet(ConfigConstant.serverPort + "/rs/getPool");
+                        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+                        int code = httpResponse.getStatusLine().getStatusCode();
+                        if (code == 200) {
+                            Message msg = new Message();
+                            msg.what = 1;
+                            msg.obj = EntityUtils.toString(
+                                    httpResponse.getEntity(), "UTF8");
+                            mHandler.sendMessage(msg);
+                        } else {
+                            Message msg = new Message();
+                            msg.what = 0;
+                            mHandler.sendMessage(msg);
+                        }
+                        Thread.sleep(5000);
+                    }
+                }catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        fetchPoolThread.start();
     }
 
     private void initEvent() {
