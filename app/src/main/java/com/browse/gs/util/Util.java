@@ -76,4 +76,10 @@ public class Util {
     {
         radioGroup.check(value);
     }
+    //2018-09-09T04:19:12.000+0000 转为 2018-09-09 04:19:12
+    public static String converDateTimeFormat(String d1){
+        d1=d1.replace('T',' ');
+        return d1.substring(0,d1.indexOf('.'));
+
+    }
 }

@@ -86,8 +86,6 @@ public class SettingDialog extends Dialog {
 
         init();
         initEvent();
-
-
         this.setCancelable(true);
     }
 
@@ -113,7 +111,11 @@ public class SettingDialog extends Dialog {
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //保存到本地缓存
                 saveToSharedPreference();
+                //通知主页面设置加气站和加气机的名称
+                ((MainActivity) context).gasName.setText(gasName.getText().toString());
+                ((MainActivity) context).gasMachineCode.setText(gasMachineCode.getSelectedItem().toString());
                 dismiss();
             }
         });

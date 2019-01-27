@@ -27,14 +27,14 @@
         <item>张三丰</item>
     </string-array>
     <string-array name="gasMachineCode">
-        <item>1号加气机</item>
-        <item>2号加气机</item>
-        <item>3号加气机</item>
-        <item>4号加气机</item>
-        <item>5号加气机</item>
-        <item>6号加气机</item>
-        <item>7号加气机</item>
-        <item>8号加气机</item>
+        <item>1号机</item>
+        <item>2号机</item>
+        <item>3号机</item>
+        <item>4号机</item>
+        <item>5号机</item>
+        <item>6号机</item>
+        <item>7号机</item>
+        <item>8号机</item>
     </string-array>
     <string-array name="gunCode">
         <item>1号枪</item>
