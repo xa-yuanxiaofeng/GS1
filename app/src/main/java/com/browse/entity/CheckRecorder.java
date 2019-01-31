@@ -1,5 +1,6 @@
-package com.browse.gs;
+package com.browse.entity;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 
@@ -9,7 +10,7 @@ import java.util.Date;
 
 //充装检查数据，实体类
 @JSONType
-public class CheckRecorderEntity implements Serializable {
+public class CheckRecorder implements Serializable {
     //车牌号
     private String plateNumber="";
     //气瓶号
@@ -27,22 +28,35 @@ public class CheckRecorderEntity implements Serializable {
     private int surfaceAfter=0;
     //充装后泄漏检查
     private int leakAfter=0;
-    //充装前余压
-    private String pressBefore="";
-    //充装开始时间(format = "yyyy-MM-dd HH:mm:ss")
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private Date startTime = new Date();
-    //充装后压力
-    private String pressAfter="";
-    //充装结束时间
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private Date EndTime=new Date();
+
+    //充装数据id
+    private String fillDataId;
+    //充装显示数据,不用存储到数据库中，仅显示使用
+    private JSONObject fillData;
+
+
     //检查员
     private String CheckOperator="";
     //充装员
     private String fillOperator="";
     //司机签字文件名
     private String signFile="";
+
+    public JSONObject getFillData() {
+        return fillData;
+    }
+
+    public void setFillData(JSONObject fillData) {
+        this.fillData = fillData;
+    }
+
+    public String getFillDataId() {
+        return fillDataId;
+    }
+
+    public void setFillDataId(String fillDataId) {
+        this.fillDataId = fillDataId;
+    }
 
     public String getSignFile() {
         return signFile;
@@ -77,9 +91,7 @@ public class CheckRecorderEntity implements Serializable {
         GunNumber = gunNumber;
     }
 
-
-
-    public CheckRecorderEntity(String plateNumber) {
+    public CheckRecorder(String plateNumber) {
         this.plateNumber = plateNumber;
     }
 
@@ -113,38 +125,6 @@ public class CheckRecorderEntity implements Serializable {
 
     public void setLeakAfter(int leakAfter) {
         this.leakAfter = leakAfter;
-    }
-
-    public String getPressBefore() {
-        return pressBefore;
-    }
-
-    public void setPressBefore(String pressBefore) {
-        this.pressBefore = pressBefore;
-    }
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public String getPressAfter() {
-        return pressAfter;
-    }
-
-    public void setPressAfter(String pressAfter) {
-        this.pressAfter = pressAfter;
-    }
-
-    public Date getEndTime() {
-        return EndTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        EndTime = endTime;
     }
 
     public String getCheckOperator() {

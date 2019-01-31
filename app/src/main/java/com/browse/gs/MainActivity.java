@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,21 +14,17 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CalendarView;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.browse.entity.CheckRecorder;
 import com.browse.gs.adpter.MySpinnerAdapter;
 import com.browse.gs.util.ConfigConstant;
 import com.browse.gs.util.Util;
@@ -42,7 +37,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
@@ -51,16 +45,13 @@ import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.jar.Attributes;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.widget.Toast.LENGTH_LONG;
 import static com.browse.gs.util.Util.getSharedPreference;
 
 public class MainActivity extends AppCompatActivity {
@@ -87,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     //当前被选中的tab
     int pointer = -1;
     //页面数据链表
-    ArrayList<CheckRecorderEntity> datas = new ArrayList<CheckRecorderEntity>();
+    ArrayList<CheckRecorder> checkRecorders = new ArrayList<CheckRecorder>();
 
     //气瓶编号
     @BindView(R.id.etCylinderNumber)
@@ -122,8 +113,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.rgLeakAfter)
     public RadioGroup rgLeakAfter;
 
-    //充装id
-    String fileDataId;
+    //充装数据id
+    String fillDataId;
     //充装数据显示
     @BindView(R.id.tvFillDataInfo)
     public TextView tvFillDataInfo;
@@ -146,12 +137,15 @@ public class MainActivity extends AppCompatActivity {
     //读取ServerPool的线程，每1秒刷新一次plateNumbers
     Thread fetchPoolThread;
 
+    //上传数据
+    Thread mUploadDataThread;
+
     //读取t_fill_data的线程，每1秒刷新一次plateNumbers
     Thread fetchFillDataThread;
     //日期数据格式
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
 
-    // 车牌httpRequest返回处理
+    // 从pool中取车牌，httpRequest返回处理
     private Handler mPlateNumbersHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -179,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
     // 实时充装数据httpRequest返回处理
     private Handler mFillDataHandler = new Handler() {
         @Override
@@ -186,8 +181,16 @@ public class MainActivity extends AppCompatActivity {
             if (1 == msg.what) {
                 super.handleMessage(msg);
                 try {
+                    if (pointer == -1) {
+                        Toast.makeText(MainActivity.this, "请先选中车辆", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     JSONObject jsonObject = JSONObject.parseObject((String) msg.obj);
-                    showFillData(jsonObject);
+                    CheckRecorder checkRecorder = checkRecorders.get(pointer);
+                    checkRecorder.setFillDataId(jsonObject.get("id").toString());
+                    checkRecorder.setFillData(jsonObject);
+                    //重新读取数据，刷新页面
+                    readData(pointer);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return;
@@ -281,18 +284,18 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 //增加实体数据
                 String selectedPN = plateNumbers.get(i);
-                //tab和datas同增同删，数据列表中加入检查的实体数据,用车牌号构造，
-                CheckRecorderEntity entity = new CheckRecorderEntity(selectedPN);
+                //tab和checkRecorders同增同删，数据列表中加入检查的实体数据,用车牌号构造，
+                CheckRecorder entity = new CheckRecorder(selectedPN);
                 //设定4个radio选项默认值
                 entity.setSurfaceBefore(R.id.radioSurfaceBeforeGood);
                 entity.setLeakBefore(R.id.radioLeakBeforeNo);
                 entity.setSurfaceAfter(R.id.radioSufaceAfterGood);
                 entity.setLeakAfter(R.id.radioLeakAfterNo);
-                //tab和datas同增同删
-                datas.add(entity);
+                //tab和checkRecorders同增同删
+                checkRecorders.add(entity);
                 topTabs.addTab(topTabs.newTab().setText(selectedPN), true);
                 //校正指针
-                pointer = datas.size() - 1;
+                pointer = checkRecorders.size() - 1;
                 //左列表中删除
                 plateNumbers.remove(i);
                 leftListViewAdapter.notifyDataSetChanged();
@@ -356,7 +359,7 @@ public class MainActivity extends AppCompatActivity {
                     //提交数据
                     saveData(oldPointer);
                     //同增同删，删除被提交的数据,指针减一
-                    datas.remove(oldPointer);
+                    checkRecorders.remove(oldPointer);
                     topTabs.removeTabAt(oldPointer);
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -403,9 +406,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radioSurfaceBeforeGood) {
                     //充装前外观
-                    datas.get(pointer).setSurfaceBefore(1);
+                    checkRecorders.get(pointer).setSurfaceBefore(1);
                 } else {
-                    datas.get(pointer).setSurfaceBefore(0);
+                    checkRecorders.get(pointer).setSurfaceBefore(0);
                 }
             }
         });
@@ -415,9 +418,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radioLeakBeforeYes) {
                     //充装前外观
-                    datas.get(pointer).setLeakBefore(1);
+                    checkRecorders.get(pointer).setLeakBefore(1);
                 } else {
-                    datas.get(pointer).setLeakBefore(0);
+                    checkRecorders.get(pointer).setLeakBefore(0);
                 }
             }
         });
@@ -427,9 +430,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radioSufaceAfterGood) {
                     //充装前外观
-                    datas.get(pointer).setSurfaceAfter(1);
+                    checkRecorders.get(pointer).setSurfaceAfter(1);
                 } else {
-                    datas.get(pointer).setSurfaceAfter(0);
+                    checkRecorders.get(pointer).setSurfaceAfter(0);
                 }
             }
         });
@@ -439,9 +442,9 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.radioLeakAfterYes) {
                     //充装前外观
-                    datas.get(pointer).setLeakAfter(1);
+                    checkRecorders.get(pointer).setLeakAfter(1);
                 } else {
-                    datas.get(pointer).setLeakAfter(0);
+                    checkRecorders.get(pointer).setLeakAfter(0);
                 }
             }
         });
@@ -458,46 +461,45 @@ public class MainActivity extends AppCompatActivity {
     private void saveData(int _pointer) throws ParseException {
         if (_pointer == -1)
             return;
-        CheckRecorderEntity entity = datas.get(_pointer);
+        CheckRecorder checkRecorder = checkRecorders.get(_pointer);
         //气瓶号
-        entity.setCylinderNumber(cylinderNumber.getText().toString());
+        checkRecorder.setCylinderNumber(cylinderNumber.getText().toString());
         //有效期
         String validDate = etValidityDate.getText().toString();
         if (validDate != null && validDate.length() == 8)
-            entity.setValidityPeriod(simpleDateFormat.parse(validDate));
+            checkRecorder.setValidityPeriod(simpleDateFormat.parse(validDate));
         //枪编号
-        entity.setGunNumber(spGunCode.getSelectedItem().toString());
+        checkRecorder.setGunNumber(spGunCode.getSelectedItem().toString());
         //充装前外观
-        entity.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
+        checkRecorder.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
         //充装前泄漏
-        entity.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId());
+        checkRecorder.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId());
         //充装后外观
-        entity.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId());
+        checkRecorder.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId());
         //充装后泄漏
-        entity.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
+        checkRecorder.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
         //图片文件名,从签字返回的result中赋值
         //entity.setSignFile(imageFileName);
         //检查员
-        entity.setCheckOperator(spCheckOperator.getSelectedItem().toString());
+        checkRecorder.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
-        entity.setFillOperator(spFillOperator.getSelectedItem().toString());
-        //充装前余压
-        //充装开始时间
-        //充装压力
-        //充装后压力
-        //充装结束时间
-        //充装气量
+        checkRecorder.setFillOperator(spFillOperator.getSelectedItem().toString());
+        Log.i("---",JSONObject.toJSONString(checkRecorder));
+        //检查的数据上传，调用add方法
+        uploadDataAdd(checkRecorder);
+
     }
+
 
     //从内存实体中读取当前数据
     private void readData(int _pointer) throws ParseException {
         if (_pointer == -1)
             return;
-        CheckRecorderEntity entity = datas.get(_pointer);
+        CheckRecorder checkRecorder = checkRecorders.get(_pointer);
         //气瓶号
-        cylinderNumber.setText(entity.getCylinderNumber());
+        cylinderNumber.setText(checkRecorder.getCylinderNumber());
         //有效期
-        Date tempDate = entity.getValidityPeriod();
+        Date tempDate = checkRecorder.getValidityPeriod();
         //如果日期为空
         if (tempDate == null)
             etValidityDate.setText("");
@@ -506,21 +508,21 @@ public class MainActivity extends AppCompatActivity {
             etValidityDate.setText(simpleDateFormat.format(tempDate));
         }
         //枪编号
-        Util.setSpinnerSelectItem(spGunCode, entity.getGunNumber());
+        Util.setSpinnerSelectItem(spGunCode, checkRecorder.getGunNumber());
         //充装前外观
-        rgSurfaceBefore.check(entity.getSurfaceBefore());
+        rgSurfaceBefore.check(checkRecorder.getSurfaceBefore());
         //充装前泄漏
-        rgLeakBefore.check(entity.getLeakBefore());
+        rgLeakBefore.check(checkRecorder.getLeakBefore());
         //充装后外观
-        rgSufaceAfter.check(entity.getSurfaceAfter());
+        rgSufaceAfter.check(checkRecorder.getSurfaceAfter());
         //充装后泄漏
-        rgLeakAfter.check(entity.getLeakAfter());
+        rgLeakAfter.check(checkRecorder.getLeakAfter());
         //设置检查员
-        Util.setSpinnerSelectItem(spCheckOperator, entity.getCheckOperator());
+        Util.setSpinnerSelectItem(spCheckOperator, checkRecorder.getCheckOperator());
         //设置充装员
-        Util.setSpinnerSelectItem(spFillOperator, entity.getFillOperator());
+        Util.setSpinnerSelectItem(spFillOperator, checkRecorder.getFillOperator());
         //设置签名，图片文件名,从签字返回的result中赋值
-        String imageFileName = entity.getSignFile();
+        String imageFileName = checkRecorder.getSignFile();
         if (imageFileName != null && Util.fileExists(imageFileName)) {
             //显示签名图片
             Bitmap bmp = Util.getBitmapThumbnail(imageFileName, 150, 105);
@@ -528,6 +530,16 @@ public class MainActivity extends AppCompatActivity {
             signImage.setImageBitmap(bmp);
         } else
             signImage.setImageDrawable(null);
+        //显示充装数据
+        JSONObject fillData = checkRecorder.getFillData();
+        if (fillData == null) {
+            tvFillDataInfo.setText("");
+        } else {
+            String info = "开始时间:" + Util.converDateTimeFormat(fillData.get("startTime").toString()) + "  余压:" + fillData.get("pressBefore").toString() +
+                    "\r\n气源压力:" + fillData.get("gasPress").toString() + "  充装量:" + fillData.get("gasCubage").toString() +
+                    "\r\n结束时间:" + Util.converDateTimeFormat(fillData.get("endTime").toString()) + "  充装后压力:" + fillData.get("pressAfter").toString();
+            tvFillDataInfo.setText(info);
+        }
     }
 
     //弹出签字界面
@@ -576,7 +588,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             //设置签名文件的名字
-            datas.get(pointer).setSignFile(imageFileName);
+            checkRecorders.get(pointer).setSignFile(imageFileName);
         } catch (Exception e) {
             Toast.makeText(this, "----------" + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
@@ -590,13 +602,36 @@ public class MainActivity extends AppCompatActivity {
         Util.setSharedPreference(this, "FileDir", directory.getAbsolutePath() + "/");
     }
 
-    //显示充装数据
-    private void showFillData(JSONObject jo){
-        String info="开始时间:"+Util.converDateTimeFormat(jo.get("startTime").toString())+"  余压:"+jo.get("pressBefore").toString()+
-                    "\r\n气源压力:"+jo.get("gasPress").toString()+"  充装量:"+jo.get("gasCubage").toString()+
-                    "\r\n结束时间:"+Util.converDateTimeFormat(jo.get("endTime").toString())+ "  充装后压力:"+jo.get("pressAfter").toString();
-        tvFillDataInfo.setText(info);
+    //上传数据
+    private void uploadDataAdd(final CheckRecorder checkRecorder) {
+        //上传数据
+        mUploadDataThread= new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String jsonStr = JSONObject.toJSONString(checkRecorder);
+                    JSONObject jsonObject = JSONObject.parseObject(jsonStr);
+                    HttpPost httpPost = new HttpPost(ConfigConstant.serverPort + "/check/add");
+                    httpPost.addHeader("Content-Type", "application/json;charset=utf-8");
+                    StringEntity entity = new StringEntity(jsonObject.toString(), "utf-8");
+                    entity.setContentEncoding("UTF-8");
+                    httpPost.setEntity(entity);
+                    HttpClient httpClient = new DefaultHttpClient();
+                    HttpResponse httpResp = httpClient.execute(httpPost);
+                    if (httpResp != null) {
+                        if (httpResp.getStatusLine().getStatusCode() == 200)
+                            Log.i("---","上传成功");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        mUploadDataThread.start();
     }
 }
+
+
+
 
 
