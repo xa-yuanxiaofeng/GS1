@@ -95,7 +95,7 @@
                         android:id="@+id/etCylinderNumber"
                         android:layout_width="150dp"
                         android:layout_height="wrap_content"
-                        android:inputType="number" />
+                         />
 
                     <TextView
                         android:id="@+id/textView4"
@@ -106,7 +106,7 @@
                         android:layout_marginLeft="20dp"/>
 
                     <EditText
-                        android:id="@+id/validDate"
+                        android:id="@+id/etValidDate"
                         android:layout_height="wrap_content"
                         android:layout_width="150dp"
                         android:textSize="30sp"

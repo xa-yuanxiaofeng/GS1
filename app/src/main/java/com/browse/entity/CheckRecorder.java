@@ -5,7 +5,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Date;
 
 //充装检查数据，实体类
@@ -16,10 +15,10 @@ public class CheckRecorder implements Serializable {
     //气瓶号
     private String cylinderNumber="";
     //有效期
-    @JSONField(format = "yyyyMMdd")
-    private Date validityPeriod;
+    @JSONField(format = "yyyy-MM-dd")
+    private Date validDate;
     //枪编号
-    private String GunNumber="";
+    private String gunNumber="";
     //充装前外观检查
     private int surfaceBefore=0;
     //充装前泄漏检查
@@ -36,7 +35,7 @@ public class CheckRecorder implements Serializable {
 
 
     //检查员
-    private String CheckOperator="";
+    private String checkOperator="";
     //充装员
     private String fillOperator="";
     //司机签字文件名
@@ -72,23 +71,23 @@ public class CheckRecorder implements Serializable {
     }
 
     public void setCylinderNumber(String cylinderNumber) {
-        cylinderNumber = cylinderNumber;
+        this.cylinderNumber = cylinderNumber;
     }
 
-    public Date getValidityPeriod() {
-        return validityPeriod;
+    public Date getValidDate() {
+        return validDate;
     }
 
-    public void setValidityPeriod(Date validityPeriod) {
-        validityPeriod = validityPeriod;
+    public void setValidDate(Date validDate) {
+        this.validDate = validDate;
     }
 
     public String getGunNumber() {
-        return GunNumber;
+        return gunNumber;
     }
 
     public void setGunNumber(String gunNumber) {
-        GunNumber = gunNumber;
+        this.gunNumber = gunNumber;
     }
 
     public CheckRecorder(String plateNumber) {
@@ -128,11 +127,11 @@ public class CheckRecorder implements Serializable {
     }
 
     public String getCheckOperator() {
-        return CheckOperator;
+        return checkOperator;
     }
 
     public void setCheckOperator(String checkOperator) {
-        CheckOperator = checkOperator;
+        this.checkOperator = checkOperator;
     }
 
     public String getFillOperator() {
@@ -142,11 +141,11 @@ public class CheckRecorder implements Serializable {
     public void setFillOperator(String fillOperator) {
         this.fillOperator = fillOperator;
     }
-    public String getNumber() {
+    public String getPlateNumber() {
         return plateNumber;
     }
 
-    public void setNumber(String plateNumber) {
+    public void setPlateNumber(String plateNumber) {
         this.plateNumber = plateNumber;
     }
 

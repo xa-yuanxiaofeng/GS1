@@ -77,15 +77,17 @@ public class MainActivity extends AppCompatActivity {
     TabLayout topTabs;
     //当前被选中的tab
     int pointer = -1;
-    //页面数据链表
+
+    //检查记录
     ArrayList<CheckRecorder> checkRecorders = new ArrayList<CheckRecorder>();
 
     //气瓶编号
     @BindView(R.id.etCylinderNumber)
-    public EditText cylinderNumber;
+    public EditText etCylinderNumber;
     //有效期
-    @BindView(R.id.validDate)
-    public EditText etValidityDate;
+    @BindView(R.id.etValidDate)
+    public EditText etValidDate;
+
     //加气枪编号
     @BindView(R.id.spGunCode)
     public Spinner spGunCode;
@@ -143,7 +145,8 @@ public class MainActivity extends AppCompatActivity {
     //读取t_fill_data的线程，每1秒刷新一次plateNumbers
     Thread fetchFillDataThread;
     //日期数据格式
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+    SimpleDateFormat formDateFormat = new SimpleDateFormat("yyyyMMdd");
+
 
     // 从pool中取车牌，httpRequest返回处理
     private Handler mPlateNumbersHandler = new Handler() {
@@ -190,12 +193,11 @@ public class MainActivity extends AppCompatActivity {
                     checkRecorder.setFillDataId(jsonObject.get("id").toString());
                     checkRecorder.setFillData(jsonObject);
                     //重新读取数据，刷新页面
-                    readData(pointer);
+                    readDataFromMemory(pointer);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return;
                 }
-
             }
         }
     };
@@ -311,12 +313,12 @@ public class MainActivity extends AppCompatActivity {
                     //页面完成关闭时，产生的selected事件，直接显示
                     if (isFinish) {
                         isFinish = false;
-                        readData(pointer);
+                        readDataFromMemory(pointer);
                     } else {
-                        //1保存数据
-                        saveData(oldPointer);
+                        //页面切换时，1保存数据
+                        saveDataToMemory(oldPointer);
                         //3重新读取数据
-                        readData(pointer);
+                        readDataFromMemory(pointer);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -351,20 +353,15 @@ public class MainActivity extends AppCompatActivity {
         btFinish.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                try {
                     int oldPointer = pointer;
                     pointer--;
                     isFinish = true;
                     //提交数据
-                    saveData(oldPointer);
+                    //检查的数据上传，调用add方法
+                    uploadCurrentDataAdd();
                     //同增同删，删除被提交的数据,指针减一
                     checkRecorders.remove(oldPointer);
                     topTabs.removeTabAt(oldPointer);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
             }
         });
         //读取加气机的实时数据t_fill_data
@@ -456,18 +453,17 @@ public class MainActivity extends AppCompatActivity {
         settingDialog.show();
     }
 
-
     //保存当前的数据
-    private void saveData(int _pointer) throws ParseException {
+    private void saveDataToMemory(int _pointer) throws ParseException {
         if (_pointer == -1)
             return;
         CheckRecorder checkRecorder = checkRecorders.get(_pointer);
         //气瓶号
-        checkRecorder.setCylinderNumber(cylinderNumber.getText().toString());
+        checkRecorder.setCylinderNumber(etCylinderNumber.getText().toString());
         //有效期
-        String validDate = etValidityDate.getText().toString();
+        String validDate = etValidDate.getText().toString();
         if (validDate != null && validDate.length() == 8)
-            checkRecorder.setValidityPeriod(simpleDateFormat.parse(validDate));
+            checkRecorder.setValidDate(formDateFormat.parse(validDate));
         //枪编号
         checkRecorder.setGunNumber(spGunCode.getSelectedItem().toString());
         //充装前外观
@@ -484,28 +480,24 @@ public class MainActivity extends AppCompatActivity {
         checkRecorder.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
         checkRecorder.setFillOperator(spFillOperator.getSelectedItem().toString());
-        Log.i("---",JSONObject.toJSONString(checkRecorder));
-        //检查的数据上传，调用add方法
-        uploadDataAdd(checkRecorder);
-
     }
 
 
     //从内存实体中读取当前数据
-    private void readData(int _pointer) throws ParseException {
+    private void readDataFromMemory(int _pointer) throws ParseException {
         if (_pointer == -1)
             return;
         CheckRecorder checkRecorder = checkRecorders.get(_pointer);
         //气瓶号
-        cylinderNumber.setText(checkRecorder.getCylinderNumber());
+        etCylinderNumber.setText(checkRecorder.getCylinderNumber());
         //有效期
-        Date tempDate = checkRecorder.getValidityPeriod();
+        Date tempDate = checkRecorder.getValidDate();
         //如果日期为空
         if (tempDate == null)
-            etValidityDate.setText("");
+            etValidDate.setText("");
             //否则
         else {
-            etValidityDate.setText(simpleDateFormat.format(tempDate));
+            etValidDate.setText(formDateFormat.format(tempDate));
         }
         //枪编号
         Util.setSpinnerSelectItem(spGunCode, checkRecorder.getGunNumber());
@@ -603,24 +595,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //上传数据
-    private void uploadDataAdd(final CheckRecorder checkRecorder) {
+    private void uploadCurrentDataAdd() {
+        final JSONObject jsonCheckRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(pointer)));
+        //充装记录不上传
+        jsonCheckRecorder.remove("fillData");
+        Log.i("---", JSONObject.toJSONString(jsonCheckRecorder));
         //上传数据
-        mUploadDataThread= new Thread(new Runnable() {
+        mUploadDataThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String jsonStr = JSONObject.toJSONString(checkRecorder);
-                    JSONObject jsonObject = JSONObject.parseObject(jsonStr);
                     HttpPost httpPost = new HttpPost(ConfigConstant.serverPort + "/check/add");
                     httpPost.addHeader("Content-Type", "application/json;charset=utf-8");
-                    StringEntity entity = new StringEntity(jsonObject.toString(), "utf-8");
+                    StringEntity entity = new StringEntity(jsonCheckRecorder.toString(), "utf-8");
                     entity.setContentEncoding("UTF-8");
                     httpPost.setEntity(entity);
                     HttpClient httpClient = new DefaultHttpClient();
                     HttpResponse httpResp = httpClient.execute(httpPost);
                     if (httpResp != null) {
                         if (httpResp.getStatusLine().getStatusCode() == 200)
-                            Log.i("---","上传成功");
+                            Log.i("---", "上传成功");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
