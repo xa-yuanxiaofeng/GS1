@@ -46,6 +46,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
 
     //检查记录
     ArrayList<CheckRecorder> checkRecorders = new ArrayList<CheckRecorder>();
+    //充装记录
+    ArrayList<JSONObject> fillRecorders=new ArrayList<JSONObject>();
 
     //气瓶编号
     @BindView(R.id.etCylinderNumber)
@@ -145,9 +148,7 @@ public class MainActivity extends AppCompatActivity {
     //读取t_fill_data的线程，每1秒刷新一次plateNumbers
     Thread fetchFillDataThread;
     //日期数据格式
-    SimpleDateFormat formDateFormat = new SimpleDateFormat("yyyyMMdd");
-
-
+    SimpleDateFormat formDateFormat = new SimpleDateFormat("yyyymmdd");
     // 从pool中取车牌，httpRequest返回处理
     private Handler mPlateNumbersHandler = new Handler() {
         @Override
@@ -188,10 +189,10 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "请先选中车辆", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    JSONObject jsonObject = JSONObject.parseObject((String) msg.obj);
+                    JSONObject fillRecorder = JSONObject.parseObject((String) msg.obj);
                     CheckRecorder checkRecorder = checkRecorders.get(pointer);
-                    checkRecorder.setFillDataId(jsonObject.get("id").toString());
-                    checkRecorder.setFillData(jsonObject);
+                    checkRecorder.setFillRecorderId((int)fillRecorder.get("id"));
+                    fillRecorders.add(fillRecorder);
                     //重新读取数据，刷新页面
                     readDataFromMemory(pointer);
                 } catch (Exception e) {
@@ -358,10 +359,27 @@ public class MainActivity extends AppCompatActivity {
                     isFinish = true;
                     //提交数据
                     //检查的数据上传，调用add方法
-                    uploadCurrentDataAdd();
+                    addCurrentFillRecorder();
                     //同增同删，删除被提交的数据,指针减一
+                    fillRecorders.remove(getFillRecorder(checkRecorders.get(oldPointer).getFillRecorderId()));
                     checkRecorders.remove(oldPointer);
                     topTabs.removeTabAt(oldPointer);
+            }
+        });
+        //设置数据保存到内存中，在没有tab切换时
+        etCylinderNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus)
+                    saveDataToMemory(pointer);
+            }
+        });
+        etValidDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+                    saveDataToMemory(pointer);
+                }
             }
         });
         //读取加气机的实时数据t_fill_data
@@ -454,7 +472,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //保存当前的数据
-    private void saveDataToMemory(int _pointer) throws ParseException {
+    private void saveDataToMemory(int _pointer)  {
+        try {
         if (_pointer == -1)
             return;
         CheckRecorder checkRecorder = checkRecorders.get(_pointer);
@@ -462,8 +481,10 @@ public class MainActivity extends AppCompatActivity {
         checkRecorder.setCylinderNumber(etCylinderNumber.getText().toString());
         //有效期
         String validDate = etValidDate.getText().toString();
-        if (validDate != null && validDate.length() == 8)
-            checkRecorder.setValidDate(formDateFormat.parse(validDate));
+        Log.i("validDate---:",validDate);
+        if (validDate != null && validDate.length() == 8) {
+                checkRecorder.setValidDate(formDateFormat.parse(validDate));
+        }
         //枪编号
         checkRecorder.setGunNumber(spGunCode.getSelectedItem().toString());
         //充装前外观
@@ -480,6 +501,9 @@ public class MainActivity extends AppCompatActivity {
         checkRecorder.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
         checkRecorder.setFillOperator(spFillOperator.getSelectedItem().toString());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -522,11 +546,10 @@ public class MainActivity extends AppCompatActivity {
             signImage.setImageBitmap(bmp);
         } else
             signImage.setImageDrawable(null);
-        //显示充装数据
-        JSONObject fillData = checkRecorder.getFillData();
-        if (fillData == null) {
+        if (fillRecorders.size()<1) {
             tvFillDataInfo.setText("");
         } else {
+            JSONObject fillData =this.getFillRecorder(checkRecorder.getFillRecorderId());
             String info = "开始时间:" + Util.converDateTimeFormat(fillData.get("startTime").toString()) + "  余压:" + fillData.get("pressBefore").toString() +
                     "\r\n气源压力:" + fillData.get("gasPress").toString() + "  充装量:" + fillData.get("gasCubage").toString() +
                     "\r\n结束时间:" + Util.converDateTimeFormat(fillData.get("endTime").toString()) + "  充装后压力:" + fillData.get("pressAfter").toString();
@@ -595,11 +618,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //上传数据
-    private void uploadCurrentDataAdd() {
-        final JSONObject jsonCheckRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(pointer)));
-        //充装记录不上传
-        jsonCheckRecorder.remove("fillData");
-        Log.i("---", JSONObject.toJSONString(jsonCheckRecorder));
+    private void addCurrentFillRecorder() {
+        final JSONObject checkRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(pointer)));
+        Log.i("-----",checkRecorder.toJSONString().toString());
         //上传数据
         mUploadDataThread = new Thread(new Runnable() {
             @Override
@@ -607,7 +628,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     HttpPost httpPost = new HttpPost(ConfigConstant.serverPort + "/check/add");
                     httpPost.addHeader("Content-Type", "application/json;charset=utf-8");
-                    StringEntity entity = new StringEntity(jsonCheckRecorder.toString(), "utf-8");
+                    StringEntity entity = new StringEntity(checkRecorder.toString(), "utf-8");
                     entity.setContentEncoding("UTF-8");
                     httpPost.setEntity(entity);
                     HttpClient httpClient = new DefaultHttpClient();
@@ -622,6 +643,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mUploadDataThread.start();
+    }
+
+    //在充装记录中查找
+    private JSONObject getFillRecorder(int id){
+        JSONObject ret =null;
+        for (JSONObject recorder : this.fillRecorders) {
+            if((int)recorder.get("id")==id){
+                ret =recorder;
+                break;
+            }
+        }
+        return ret;
     }
 }
 

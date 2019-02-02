@@ -28,11 +28,8 @@ public class CheckRecorder implements Serializable {
     //充装后泄漏检查
     private int leakAfter=0;
 
-    //充装数据id
-    private String fillDataId;
-    //充装显示数据,不用存储到数据库中，仅显示使用
-    private JSONObject fillData;
-
+    //充装记录id
+    private int fillRecorderId;
 
     //检查员
     private String checkOperator="";
@@ -41,20 +38,12 @@ public class CheckRecorder implements Serializable {
     //司机签字文件名
     private String signFile="";
 
-    public JSONObject getFillData() {
-        return fillData;
+    public int getFillRecorderId() {
+        return fillRecorderId;
     }
 
-    public void setFillData(JSONObject fillData) {
-        this.fillData = fillData;
-    }
-
-    public String getFillDataId() {
-        return fillDataId;
-    }
-
-    public void setFillDataId(String fillDataId) {
-        this.fillDataId = fillDataId;
+    public void setFillRecorderId(int fillRecorderId) {
+        this.fillRecorderId = fillRecorderId;
     }
 
     public String getSignFile() {

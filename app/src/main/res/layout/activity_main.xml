@@ -110,8 +110,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="150dp"
                         android:textSize="30sp"
-                        android:ems="10"
-                        android:inputType="date"/>
+                        />
 
                     <Spinner
                         android:id="@+id/spGunCode"
