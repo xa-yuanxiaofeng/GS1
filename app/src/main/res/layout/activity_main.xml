@@ -127,14 +127,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
-                        android:text="加气机编号:"
                         android:textSize="30sp" />
                     <TextView
                         android:id="@+id/gasName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="20dp"
-                        android:text="加气站名称"
                         android:textSize="30sp" />
                 </LinearLayout>
 

@@ -46,7 +46,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     Button btExit;
     @BindView(R.id.buttonFinish)
     Button btFinish;
-    boolean isFinish = false;
+    Boolean finishAction=false;
     @BindView(R.id.btFetchData)
     Button btFetchData;
 
@@ -96,10 +95,10 @@ public class MainActivity extends AppCompatActivity {
     public Spinner spGunCode;
     //加气机编号
     @BindView(R.id.gasMachineCode)
-    public TextView gasMachineCode;
+    public TextView tvGasMachineCode;
     //加气站名称
     @BindView(R.id.gasName)
-    public TextView gasName;
+    public TextView tvGasName;
 
 
     //加气机编号
@@ -193,8 +192,8 @@ public class MainActivity extends AppCompatActivity {
                     CheckRecorder checkRecorder = checkRecorders.get(pointer);
                     checkRecorder.setFillRecorderId((int)fillRecorder.get("id"));
                     fillRecorders.add(fillRecorder);
-                    //重新读取数据，刷新页面
-                    readDataFromMemory(pointer);
+                    //显示到页面区域
+                    readFillRecorderFromMemory(pointer);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return;
@@ -239,11 +238,11 @@ public class MainActivity extends AppCompatActivity {
         //加气站名称
         String temp = getSharedPreference(this, "gasName");
         if (temp != null && !temp.equals(""))
-            gasName.setText(temp);
+            tvGasName.setText(temp);
         //加气机编号
         temp = getSharedPreference(this, "gasMachineCode");
         if (temp != null && !temp.equals(""))
-            gasMachineCode.setText(temp);
+            tvGasMachineCode.setText(temp);
 
         // topTabs初始化
         this.setPath();
@@ -308,19 +307,19 @@ public class MainActivity extends AppCompatActivity {
         topTabs.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                int oldPointer = pointer;
-                pointer = tab.getPosition();
                 try {
-                    //页面完成关闭时，产生的selected事件，直接显示
-                    if (isFinish) {
-                        isFinish = false;
-                        readDataFromMemory(pointer);
-                    } else {
-                        //页面切换时，1保存数据
-                        saveDataToMemory(oldPointer);
-                        //3重新读取数据
-                        readDataFromMemory(pointer);
+                    int oldPointer = pointer;
+                    pointer = tab.getPosition();
+                    //因提交动作产生的OnTabSelectedListener，不用保存
+                    if(finishAction) {
+                        finishAction = false;
+                    }else{
+                        saveCheckRecorderToMemory(oldPointer);
+                        saveCheckRecorderToMemory(oldPointer);
                     }
+                    //3重新读取数据
+                    readCheckRecorderFromMemory(pointer);
+                    readFillRecorderFromMemory(pointer);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -354,34 +353,24 @@ public class MainActivity extends AppCompatActivity {
         btFinish.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    int oldPointer = pointer;
-                    pointer--;
-                    isFinish = true;
-                    //提交数据
-                    //检查的数据上传，调用add方法
-                    addCurrentFillRecorder();
-                    //同增同删，删除被提交的数据,指针减一
-                    fillRecorders.remove(getFillRecorder(checkRecorders.get(oldPointer).getFillRecorderId()));
-                    checkRecorders.remove(oldPointer);
-                    topTabs.removeTabAt(oldPointer);
+                finishAction=true;
+                int oldPointer = pointer;
+                pointer = topTabs.getSelectedTabPosition();
+                //完成时，先保存，再提交
+                saveCheckRecorderToMemory(oldPointer);
+                //检查的数据上传，调用add方法
+                addCurrentFillRecorder(oldPointer);
+                //同增同删，删除被提交的数据,指针减一
+                fillRecorders.remove(getFillRecorder(checkRecorders.get(oldPointer).getFillRecorderId()));
+                checkRecorders.remove(oldPointer);
+                topTabs.removeTabAt(oldPointer);
+                //读取内存中的检查记录
+                readCheckRecorderFromMemory(pointer);
+                //读取内存中的充装记录
+                readFillRecorderFromMemory(pointer);
             }
         });
-        //设置数据保存到内存中，在没有tab切换时
-        etCylinderNumber.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus)
-                    saveDataToMemory(pointer);
-            }
-        });
-        etValidDate.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(!hasFocus){
-                    saveDataToMemory(pointer);
-                }
-            }
-        });
+
         //读取加气机的实时数据t_fill_data
         btFetchData.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -472,7 +461,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //保存当前的数据
-    private void saveDataToMemory(int _pointer)  {
+    private void saveCheckRecorderToMemory(int _pointer)  {
         try {
         if (_pointer == -1)
             return;
@@ -486,7 +475,11 @@ public class MainActivity extends AppCompatActivity {
                 checkRecorder.setValidDate(formDateFormat.parse(validDate));
         }
         //枪编号
-        checkRecorder.setGunNumber(spGunCode.getSelectedItem().toString());
+        checkRecorder.setGunCode(spGunCode.getSelectedItem().toString());
+        //加气机编号
+        checkRecorder.setGasMachineCode(tvGasMachineCode.getText().toString());
+        //加气站编号
+        checkRecorder.setGasName(tvGasName.getText().toString());
         //充装前外观
         checkRecorder.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
         //充装前泄漏
@@ -507,10 +500,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //从内存实体中读取当前数据
-    private void readDataFromMemory(int _pointer) throws ParseException {
-        if (_pointer == -1)
+    //从内存中读取当前检查数据
+    private void readCheckRecorderFromMemory(int _pointer)  {
+        if (checkRecorders.size()<1){
+            //情况页面数据
+            etCylinderNumber.setText("");
+            etValidDate.setText("");
             return;
+        }
+
         CheckRecorder checkRecorder = checkRecorders.get(_pointer);
         //气瓶号
         etCylinderNumber.setText(checkRecorder.getCylinderNumber());
@@ -524,7 +522,7 @@ public class MainActivity extends AppCompatActivity {
             etValidDate.setText(formDateFormat.format(tempDate));
         }
         //枪编号
-        Util.setSpinnerSelectItem(spGunCode, checkRecorder.getGunNumber());
+        Util.setSpinnerSelectItem(spGunCode, checkRecorder.getGunCode());
         //充装前外观
         rgSurfaceBefore.check(checkRecorder.getSurfaceBefore());
         //充装前泄漏
@@ -546,17 +544,22 @@ public class MainActivity extends AppCompatActivity {
             signImage.setImageBitmap(bmp);
         } else
             signImage.setImageDrawable(null);
-        if (fillRecorders.size()<1) {
+    }
+
+    //读取充装记录
+    private void readFillRecorderFromMemory(int _point){
+        Log.i("--------",String.valueOf(_point));
+        if(checkRecorders==null||checkRecorders.size() == 0||checkRecorders.get(_point)==null||checkRecorders.get(_point).getFillRecorderId()<0){
             tvFillDataInfo.setText("");
-        } else {
-            JSONObject fillData =this.getFillRecorder(checkRecorder.getFillRecorderId());
+        }else{
+            JSONObject fillData =this.getFillRecorder(checkRecorders.get(_point).getFillRecorderId());
             String info = "开始时间:" + Util.converDateTimeFormat(fillData.get("startTime").toString()) + "  余压:" + fillData.get("pressBefore").toString() +
                     "\r\n气源压力:" + fillData.get("gasPress").toString() + "  充装量:" + fillData.get("gasCubage").toString() +
                     "\r\n结束时间:" + Util.converDateTimeFormat(fillData.get("endTime").toString()) + "  充装后压力:" + fillData.get("pressAfter").toString();
             tvFillDataInfo.setText(info);
         }
+        return;
     }
-
     //弹出签字界面
     public void popSignPane(View view) {
         Intent intent = new Intent();
@@ -618,8 +621,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //上传数据
-    private void addCurrentFillRecorder() {
-        final JSONObject checkRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(pointer)));
+    private void addCurrentFillRecorder(int _pointer) {
+        final JSONObject checkRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(_pointer)));
         Log.i("-----",checkRecorder.toJSONString().toString());
         //上传数据
         mUploadDataThread = new Thread(new Runnable() {

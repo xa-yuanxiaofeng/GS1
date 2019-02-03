@@ -1,6 +1,5 @@
 package com.browse.entity;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 
@@ -17,8 +16,14 @@ public class CheckRecorder implements Serializable {
     //有效期
     @JSONField(format = "yyyy-MM-dd")
     private Date validDate;
+
     //枪编号
-    private String gunNumber="";
+    private String gunCode ="";
+    //加气机编号
+    private String gasMachineCode;
+    //加气站编号
+    private String gasName;
+
     //充装前外观检查
     private int surfaceBefore=0;
     //充装前泄漏检查
@@ -29,7 +34,7 @@ public class CheckRecorder implements Serializable {
     private int leakAfter=0;
 
     //充装记录id
-    private int fillRecorderId;
+    private int fillRecorderId=-1;
 
     //检查员
     private String checkOperator="";
@@ -37,6 +42,23 @@ public class CheckRecorder implements Serializable {
     private String fillOperator="";
     //司机签字文件名
     private String signFile="";
+
+    public String getGasMachineCode() {
+        return gasMachineCode;
+    }
+
+    public void setGasMachineCode(String gasMachineCode) {
+        this.gasMachineCode = gasMachineCode;
+    }
+
+    public String getGasName() {
+        return gasName;
+    }
+
+    public void setGasName(String gasName) {
+        this.gasName = gasName;
+    }
+
 
     public int getFillRecorderId() {
         return fillRecorderId;
@@ -71,12 +93,12 @@ public class CheckRecorder implements Serializable {
         this.validDate = validDate;
     }
 
-    public String getGunNumber() {
-        return gunNumber;
+    public String getGunCode() {
+        return gunCode;
     }
 
-    public void setGunNumber(String gunNumber) {
-        this.gunNumber = gunNumber;
+    public void setGunCode(String gunCode) {
+        this.gunCode = gunCode;
     }
 
     public CheckRecorder(String plateNumber) {

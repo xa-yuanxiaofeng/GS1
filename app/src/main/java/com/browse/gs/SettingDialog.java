@@ -114,8 +114,8 @@ public class SettingDialog extends Dialog {
                 //保存到本地缓存
                 saveToSharedPreference();
                 //通知主页面设置加气站和加气机的名称
-                ((MainActivity) context).gasName.setText(gasName.getText().toString());
-                ((MainActivity) context).gasMachineCode.setText(gasMachineCode.getSelectedItem().toString());
+                ((MainActivity) context).tvGasName.setText(gasName.getText().toString());
+                ((MainActivity) context).tvGasMachineCode.setText(gasMachineCode.getSelectedItem().toString());
                 dismiss();
             }
         });
