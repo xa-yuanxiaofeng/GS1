@@ -4,6 +4,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 
 //充装检查数据，实体类
@@ -25,11 +26,11 @@ public class CheckRecorder implements Serializable {
     private String gasName;
 
     //充装前外观检查
-    private int surfaceBefore=0;
+    private int surfaceBefore=1;
     //充装前泄漏检查
     private int leakBefore=0;
     //充装后外观检查
-    private int surfaceAfter=0;
+    private int surfaceAfter=1;
     //充装后泄漏检查
     private int leakAfter=0;
 
@@ -42,6 +43,18 @@ public class CheckRecorder implements Serializable {
     private String fillOperator="";
     //司机签字文件名
     private String signFile="";
+
+    //充装记录上传的时间
+    @JSONField(format = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    private java.sql.Timestamp checkDateTime;
+
+    public Timestamp getCheckDateTime() {
+        return checkDateTime;
+    }
+
+    public void setCheckDateTime(Timestamp checkDateTime) {
+        this.checkDateTime = checkDateTime;
+    }
 
     public String getGasMachineCode() {
         return gasMachineCode;

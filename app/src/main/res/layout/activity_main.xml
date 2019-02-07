@@ -205,17 +205,17 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal">
                                 <RadioButton
+                                    android:id="@+id/radioLeakBeforeYes"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="是"
+                                    android:textSize="30sp" />
+                                <RadioButton
                                     android:id="@+id/radioLeakBeforeNo"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="否"
                                     android:checked="true"
-                                    android:textSize="30sp" />
-                                <RadioButton
-                                    android:id="@+id/radioLeakBeforeYes"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="是"
                                     android:textSize="30sp" />
                             </RadioGroup>
                         </LinearLayout>
@@ -277,17 +277,17 @@
                                 android:orientation="horizontal">
 
                                 <RadioButton
+                                    android:id="@+id/radioLeakAfterYes"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="是"
+                                    android:textSize="30sp" />
+                                <RadioButton
                                     android:id="@+id/radioLeakAfterNo"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="否"
                                     android:checked="true"
-                                    android:textSize="30sp" />
-                                <RadioButton
-                                    android:id="@+id/radioLeakAfterYes"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="是"
                                     android:textSize="30sp" />
                             </RadioGroup>
                         </LinearLayout>

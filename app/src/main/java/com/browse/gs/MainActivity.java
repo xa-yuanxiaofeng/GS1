@@ -42,6 +42,7 @@ import org.apache.http.util.EntityUtils;
 
 
 import java.io.File;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -289,10 +290,10 @@ public class MainActivity extends AppCompatActivity {
                 //tab和checkRecorders同增同删，数据列表中加入检查的实体数据,用车牌号构造，
                 CheckRecorder entity = new CheckRecorder(selectedPN);
                 //设定4个radio选项默认值
-                entity.setSurfaceBefore(R.id.radioSurfaceBeforeGood);
-                entity.setLeakBefore(R.id.radioLeakBeforeNo);
-                entity.setSurfaceAfter(R.id.radioSufaceAfterGood);
-                entity.setLeakAfter(R.id.radioLeakAfterNo);
+                entity.setSurfaceBefore(1);
+                entity.setLeakBefore(0);
+                entity.setSurfaceAfter(1);
+                entity.setLeakAfter(0);
                 //tab和checkRecorders同增同删
                 checkRecorders.add(entity);
                 topTabs.addTab(topTabs.newTab().setText(selectedPN), true);
@@ -481,13 +482,13 @@ public class MainActivity extends AppCompatActivity {
         //加气站编号
         checkRecorder.setGasName(tvGasName.getText().toString());
         //充装前外观
-        checkRecorder.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId());
+        checkRecorder.setSurfaceBefore(rgSurfaceBefore.getCheckedRadioButtonId()==R.id.radioSurfaceBeforeGood?1:0);
         //充装前泄漏
-        checkRecorder.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId());
+        checkRecorder.setLeakBefore(rgLeakBefore.getCheckedRadioButtonId()==R.id.radioLeakBeforeYes?1:0);
         //充装后外观
-        checkRecorder.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId());
+        checkRecorder.setSurfaceAfter(rgSufaceAfter.getCheckedRadioButtonId()==R.id.radioSufaceAfterGood?1:0);
         //充装后泄漏
-        checkRecorder.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId());
+        checkRecorder.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId()==R.id.radioLeakAfterYes?1:0);
         //图片文件名,从签字返回的result中赋值
         //entity.setSignFile(imageFileName);
         //检查员
@@ -524,13 +525,25 @@ public class MainActivity extends AppCompatActivity {
         //枪编号
         Util.setSpinnerSelectItem(spGunCode, checkRecorder.getGunCode());
         //充装前外观
-        rgSurfaceBefore.check(checkRecorder.getSurfaceBefore());
+        if(checkRecorder.getSurfaceBefore()==1)
+             rgSurfaceBefore.check(R.id.radioSurfaceBeforeGood);
+        else
+            rgSurfaceBefore.check(R.id.radioSurfaceBeforeBad);
         //充装前泄漏
-        rgLeakBefore.check(checkRecorder.getLeakBefore());
+        if(checkRecorder.getLeakBefore()==1)
+            rgLeakBefore.check(R.id.radioLeakBeforeYes);
+        else
+            rgLeakBefore.check(R.id.radioLeakBeforeNo);
         //充装后外观
-        rgSufaceAfter.check(checkRecorder.getSurfaceAfter());
+        if(checkRecorder.getSurfaceAfter()==1)
+            rgSufaceAfter.check(R.id.radioSufaceAfterGood);
+        else
+            rgSufaceAfter.check(R.id.radioSufaceAfterBad);
         //充装后泄漏
-        rgLeakAfter.check(checkRecorder.getLeakAfter());
+        if(checkRecorder.getLeakAfter()==1)
+            rgLeakAfter.check(R.id.radioLeakAfterYes);
+        else
+            rgLeakAfter.check(R.id.radioLeakAfterNo);
         //设置检查员
         Util.setSpinnerSelectItem(spCheckOperator, checkRecorder.getCheckOperator());
         //设置充装员
@@ -622,6 +635,8 @@ public class MainActivity extends AppCompatActivity {
 
     //上传数据
     private void addCurrentFillRecorder(int _pointer) {
+        //在充装记录中增加上传时间
+        checkRecorders.get(_pointer).setCheckDateTime(new Timestamp(System.currentTimeMillis()));
         final JSONObject checkRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(_pointer)));
         Log.i("-----",checkRecorder.toJSONString().toString());
         //上传数据
