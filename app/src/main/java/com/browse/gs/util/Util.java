@@ -5,12 +5,22 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.StrictMode;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.FileEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+
 import java.io.File;
+import java.net.URLEncoder;
 
 public class Util {
     //取得本地存储
@@ -81,5 +91,29 @@ public class Util {
         d1=d1.replace('T',' ');
         return d1.substring(0,d1.indexOf('.'));
 
+    }
+
+
+    //上传文件
+    public static boolean uploadFile(String fileName) {
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try
+        {
+            HttpClient httpClient = new DefaultHttpClient();
+            HttpContext httpContext = new BasicHttpContext();
+            //fileName =URLEncoder.encode(fileName);
+            String url = ConfigConstant.serverPort + "/sign/upload";
+            HttpPost httpPost = new HttpPost(url);
+            FileEntity entity = new FileEntity(new File(fileName), "binary/octet-stream");
+            httpPost.setEntity(entity);
+            HttpResponse response = httpClient.execute(httpPost, httpContext);
+            return response.getStatusLine().getStatusCode() == 200;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

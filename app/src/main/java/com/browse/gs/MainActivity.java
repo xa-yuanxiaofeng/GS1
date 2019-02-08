@@ -142,8 +142,10 @@ public class MainActivity extends AppCompatActivity {
     //读取ServerPool的线程，每1秒刷新一次plateNumbers
     Thread fetchPoolThread;
 
-    //上传数据
-    Thread mUploadDataThread;
+    //上传检查数据
+    Thread mUploadCheckRecordThread;
+    // 上传签名图片
+    Thread mUploadSignThread;
 
     //读取t_fill_data的线程，每1秒刷新一次plateNumbers
     Thread fetchFillDataThread;
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // 实时充装数据httpRequest返回处理
-    private Handler mFillDataHandler = new Handler() {
+    private Handler mFillRecorderHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (1 == msg.what) {
@@ -316,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
                         finishAction = false;
                     }else{
                         saveCheckRecorderToMemory(oldPointer);
-                        saveCheckRecorderToMemory(oldPointer);
                     }
                     //3重新读取数据
                     readCheckRecorderFromMemory(pointer);
@@ -360,7 +361,7 @@ public class MainActivity extends AppCompatActivity {
                 //完成时，先保存，再提交
                 saveCheckRecorderToMemory(oldPointer);
                 //检查的数据上传，调用add方法
-                addCurrentFillRecorder(oldPointer);
+                uploadCheckRecorder(oldPointer);
                 //同增同删，删除被提交的数据,指针减一
                 fillRecorders.remove(getFillRecorder(checkRecorders.get(oldPointer).getFillRecorderId()));
                 checkRecorders.remove(oldPointer);
@@ -390,11 +391,11 @@ public class MainActivity extends AppCompatActivity {
                                 msg.what = 1;
                                 msg.obj = EntityUtils.toString(
                                         httpResponse.getEntity(), "UTF8");
-                                mFillDataHandler.sendMessage(msg);
+                                mFillRecorderHandler.sendMessage(msg);
                             } else {
                                 Message msg = new Message();
                                 msg.what = 0;
-                                mFillDataHandler.sendMessage(msg);
+                                mFillRecorderHandler.sendMessage(msg);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -490,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
         //充装后泄漏
         checkRecorder.setLeakAfter(rgLeakAfter.getCheckedRadioButtonId()==R.id.radioLeakAfterYes?1:0);
         //图片文件名,从签字返回的result中赋值
-        //entity.setSignFile(imageFileName);
+        //entity.setSignImage(imageFileName);
         //检查员
         checkRecorder.setCheckOperator(spCheckOperator.getSelectedItem().toString());
         //充装员
@@ -549,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
         //设置充装员
         Util.setSpinnerSelectItem(spFillOperator, checkRecorder.getFillOperator());
         //设置签名，图片文件名,从签字返回的result中赋值
-        String imageFileName = checkRecorder.getSignFile();
+        String imageFileName = checkRecorder.getSignImage();
         if (imageFileName != null && Util.fileExists(imageFileName)) {
             //显示签名图片
             Bitmap bmp = Util.getBitmapThumbnail(imageFileName, 150, 105);
@@ -619,7 +620,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             //设置签名文件的名字
-            checkRecorders.get(pointer).setSignFile(imageFileName);
+            checkRecorders.get(pointer).setSignImage(imageFileName);
         } catch (Exception e) {
             Toast.makeText(this, "----------" + e.getMessage(),
                     Toast.LENGTH_SHORT).show();
@@ -634,13 +635,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //上传数据
-    private void addCurrentFillRecorder(int _pointer) {
+    private void uploadCheckRecorder(int _pointer) {
+        //校正上传图片的文件名，去掉路径部分
+       final String signImageFileName = checkRecorders.get(_pointer).getSignImage();
+        if(signImageFileName==null){
+            Toast.makeText(this,"缺少司机签名，不能提交",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        //校正后的名字
+        String _signImageFileName =signImageFileName.substring(signImageFileName.indexOf("sign-"),signImageFileName.length());
+        checkRecorders.get(_pointer).setSignImage(_signImageFileName);
         //在充装记录中增加上传时间
         checkRecorders.get(_pointer).setCheckDateTime(new Timestamp(System.currentTimeMillis()));
         final JSONObject checkRecorder = JSONObject.parseObject(JSONObject.toJSONString(checkRecorders.get(_pointer)));
         Log.i("-----",checkRecorder.toJSONString().toString());
-        //上传数据
-        mUploadDataThread = new Thread(new Runnable() {
+        //上传CheckRecorder
+        mUploadCheckRecordThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -660,7 +670,16 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        mUploadDataThread.start();
+        mUploadCheckRecordThread.start();
+
+        //上传签名图片
+        mUploadSignThread=new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Util.uploadFile(signImageFileName);
+            }
+        });
+        mUploadSignThread.start();
     }
 
     //在充装记录中查找

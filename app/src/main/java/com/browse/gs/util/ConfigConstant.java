@@ -17,4 +17,6 @@ public class ConfigConstant {
     public static String downloadURL = "http://133.68.8.60:8077/gs.apk";
     //数据服务地址
     public static String  serverPort = "http://192.168.3.14:8080";
+
+
 }

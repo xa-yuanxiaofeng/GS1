@@ -42,7 +42,7 @@ public class CheckRecorder implements Serializable {
     //充装员
     private String fillOperator="";
     //司机签字文件名
-    private String signFile="";
+    private String signImage ="";
 
     //充装记录上传的时间
     @JSONField(format = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
@@ -81,12 +81,12 @@ public class CheckRecorder implements Serializable {
         this.fillRecorderId = fillRecorderId;
     }
 
-    public String getSignFile() {
-        return signFile;
+    public String getSignImage() {
+        return signImage;
     }
 
-    public void setSignFile(String signFile) {
-        this.signFile = signFile;
+    public void setSignImage(String signImage) {
+        this.signImage = signImage;
     }
 
 
