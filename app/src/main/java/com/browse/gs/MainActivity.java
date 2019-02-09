@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.browse.entity.CheckRecorder;
+import com.browse.gs.Service.FileService;
 import com.browse.gs.adpter.MySpinnerAdapter;
 import com.browse.gs.util.ConfigConstant;
 import com.browse.gs.util.Util;
@@ -52,6 +53,9 @@ import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import static com.browse.gs.util.Util.getSharedPreference;
 
@@ -508,6 +512,9 @@ public class MainActivity extends AppCompatActivity {
             //情况页面数据
             etCylinderNumber.setText("");
             etValidDate.setText("");
+            //Util.releaseBitmap(signImage);
+            signImage.setImageBitmap(null);
+            //signImage.setImageDrawable(null);
             return;
         }
 
@@ -676,7 +683,8 @@ public class MainActivity extends AppCompatActivity {
         mUploadSignThread=new Thread(new Runnable() {
             @Override
             public void run() {
-                Util.uploadFile(signImageFileName);
+                new FileService().uploadFile(signImageFileName);
+                Log.i("----signImageFileName:",signImageFileName);
             }
         });
         mUploadSignThread.start();
@@ -693,6 +701,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return ret;
     }
+
 }
 
 

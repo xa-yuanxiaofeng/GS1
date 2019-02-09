@@ -10,39 +10,27 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.FileEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-
 import java.io.File;
-import java.net.URLEncoder;
+
 
 public class Util {
     //取得本地存储
-    public static String getSharedPreference(Context context, String key)
-    {
+    public static String getSharedPreference(Context context, String key) {
         SharedPreferences sp = context.getSharedPreferences(Constant.AppID, Context.MODE_PRIVATE);
         String temp = sp.getString(key, "");
         return temp;
     }
 
     //进行本地存储
-    public static void setSharedPreference(Context context, String key, String value)
-    {
-        SharedPreferences.Editor editor = context.getSharedPreferences(Constant.AppID,  Context.MODE_PRIVATE).edit();
+    public static void setSharedPreference(Context context, String key, String value) {
+        SharedPreferences.Editor editor = context.getSharedPreferences(Constant.AppID, Context.MODE_PRIVATE).edit();
         editor.putString(key, value);
         editor.commit();
     }
 
-    public static boolean fileExists(String path)
-    {
+    public static boolean fileExists(String path) {
         File file = new File(path);
-        if(file.exists())
+        if (file.exists())
             return true;
         else
             return false;
@@ -60,60 +48,39 @@ public class Util {
         return bitmap;
     }
 
-    public static void releaseBitmap(ImageView iv)
-    {
-        BitmapDrawable bd = (BitmapDrawable)iv.getDrawable();
-        if(bd != null)
-        {
+    public static void releaseBitmap(ImageView iv) {
+        BitmapDrawable bd = (BitmapDrawable) iv.getDrawable();
+        if (bd != null) {
             Bitmap bt = bd.getBitmap();
-            if(bt != null && !bt.isRecycled())
+            if (bt != null && !bt.isRecycled())
                 bt.recycle();
             bt = null;
         }
     }
 
     //根据spinner的值设定显示
-    public static void setSpinnerSelectItem(Spinner spinner ,String value){
+    public static void setSpinnerSelectItem(Spinner spinner, String value) {
         int length = spinner.getAdapter().getCount();
-        for(int i=0;i<length;i++) {
+        for (int i = 0; i < length; i++) {
             if (spinner.getItemAtPosition(i).toString().equals(value)) {
                 spinner.setSelection(i);
             }
         }
     }
+
     //根据radioGroup的值设定显示
-    public static  void setRadoiGroupSelectItem(RadioGroup radioGroup,int value)
-    {
+    public static void setRadoiGroupSelectItem(RadioGroup radioGroup, int value) {
         radioGroup.check(value);
     }
+
     //2018-09-09T04:19:12.000+0000 转为 2018-09-09 04:19:12
-    public static String converDateTimeFormat(String d1){
-        d1=d1.replace('T',' ');
-        return d1.substring(0,d1.indexOf('.'));
+    public static String converDateTimeFormat(String d1) {
+        d1 = d1.replace('T', ' ');
+        return d1.substring(0, d1.indexOf('.'));
 
     }
 
 
-    //上传文件
-    public static boolean uploadFile(String fileName) {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        try
-        {
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpContext httpContext = new BasicHttpContext();
-            //fileName =URLEncoder.encode(fileName);
-            String url = ConfigConstant.serverPort + "/sign/upload";
-            HttpPost httpPost = new HttpPost(url);
-            FileEntity entity = new FileEntity(new File(fileName), "binary/octet-stream");
-            httpPost.setEntity(entity);
-            HttpResponse response = httpClient.execute(httpPost, httpContext);
-            return response.getStatusLine().getStatusCode() == 200;
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return false;
-        }
-    }
+
+
 }
