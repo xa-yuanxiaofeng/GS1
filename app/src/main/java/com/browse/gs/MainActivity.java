@@ -508,13 +508,12 @@ public class MainActivity extends AppCompatActivity {
 
     //从内存中读取当前检查数据
     private void readCheckRecorderFromMemory(int _pointer)  {
+        //数据为空时，界面清空
         if (checkRecorders.size()<1){
             //情况页面数据
             etCylinderNumber.setText("");
             etValidDate.setText("");
-            //Util.releaseBitmap(signImage);
             signImage.setImageBitmap(null);
-            //signImage.setImageDrawable(null);
             return;
         }
 
@@ -560,7 +559,7 @@ public class MainActivity extends AppCompatActivity {
         String imageFileName = checkRecorder.getSignImage();
         if (imageFileName != null && Util.fileExists(imageFileName)) {
             //显示签名图片
-            Bitmap bmp = Util.getBitmapThumbnail(imageFileName, 150, 105);
+            Bitmap bmp = Util.getBitmapThumbnail(imageFileName, 700, 300);
             Util.releaseBitmap(signImage);
             signImage.setImageBitmap(bmp);
         } else

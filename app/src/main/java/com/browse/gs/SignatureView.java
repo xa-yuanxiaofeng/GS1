@@ -167,7 +167,8 @@ public class SignatureView extends View {
             out = new FileOutputStream(Util.getSharedPreference(
                     this.getContext(), "FileDir")
                     + id + ".png");
-            bt.compress(Bitmap.CompressFormat.PNG, 90, out);
+            MyThread myThread=new MyThread(bt,out);
+            myThread.run();
             bt.recycle();
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,4 +180,19 @@ public class SignatureView extends View {
             }
         }
     }
+
+    class MyThread extends Thread{
+        private FileOutputStream out;
+        private Bitmap bt;
+        public MyThread( Bitmap bt,FileOutputStream out)
+        {
+            this.bt = bt;
+            this.out = out;
+        }
+        public void run()
+        {
+            bt.compress(Bitmap.CompressFormat.PNG, 90, out);
+        }
+    }
+
 }

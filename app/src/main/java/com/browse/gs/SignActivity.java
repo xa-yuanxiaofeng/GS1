@@ -40,8 +40,8 @@ public class SignActivity extends AppCompatActivity {
             }
         });
         //保存签字内容
-        Button btnReturn = (Button)this.findViewById(R.id.ok);
-        btnReturn.setOnClickListener(new View.OnClickListener()
+        Button btnOK = (Button)this.findViewById(R.id.ok);
+        btnOK.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view) {
